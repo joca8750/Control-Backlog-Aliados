@@ -7,185 +7,144 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.cdnfonts.com/css/league-gothic');
-        @import url('https://fonts.cdnfonts.com/css/luxia');
-
         :root { 
             --rojo: #D32F2F; 
-            --rojo-hover: #B71C1C;
-            --gris: #F4F7F6; 
-            --dark: #212121; 
+            --gris-fondo: #F4F7F6; 
+            --texto: #212121; 
+        }
+
+        /* CONFIGURACIÓN GLOBAL: ROBOTO, SIN NEGRILLA, SIN CURSIVA */
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif !important;
+            font-weight: 400 !important; 
+            font-style: normal !important;
         }
 
         body { 
-            font-family: 'Luxia', sans-serif; 
-            background: var(--gris); 
+            background: var(--gris-fondo); 
             margin: 0; 
-            padding: 20px; 
-            color: var(--dark); 
+            padding: 10px 20px; 
+            color: var(--texto); 
+            height: 100vh;
+            overflow: hidden; 
         }
 
-        /* TÍTULO PRINCIPAL: LEAGUE GOTHIC CENTRADO */
+        /* TÍTULO PRINCIPAL CENTRADO */
         h1 { 
-            font-family: 'League Gothic', sans-serif; 
             text-transform: uppercase; 
             color: var(--rojo); 
-            letter-spacing: 2px; 
-            font-weight: 400; 
-            font-style: normal;
+            letter-spacing: 1px; 
             text-align: center;
-            font-size: 3.5rem; 
-            margin: 20px 0 30px 0; 
+            font-size: 2.2rem; 
+            margin: 15px 0; 
         }
 
-        /* TÍTULOS DE GRÁFICAS Y TABLA: JOSEFIN SLAB - AJUSTE SOLICITADO */
+        /* TÍTULOS DE SECCIONES CENTRADOS - AJUSTE SOLICITADO */
         h2 { 
-            font-family: 'Josefin Slab', serif; 
-            text-transform: none; 
             color: var(--rojo); 
-            letter-spacing: 1px; 
-            font-weight: 400; 
-            font-style: normal; /* No cursiva */
-            font-size: 2.2rem; 
+            font-size: 1.2rem; 
+            margin: 0 0 10px 0; 
+            text-transform: uppercase;
+            text-align: center; /* Centrado de títulos internos */
+        }
+
+        /* BARRA DE FILTROS */
+        .toolbar { 
+            background: white; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            gap: 20px; 
+            align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+
+        label { font-size: 0.9rem; color: #555; text-transform: uppercase; }
+
+        select { 
+            padding: 6px 10px; 
+            border-radius: 4px; 
+            border: 1px solid #ddd; 
+            font-size: 0.9rem;
+            min-width: 180px; 
+            background: #fff;
+        }
+
+        /* TARJETAS KPI */
+        .resumen-container { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
             margin-bottom: 15px; 
         }
 
-        /* TARJETAS KPI (LUXIA SIN NEGRILLA) */
-        .card h3 { 
-            font-family: 'Luxia', sans-serif; 
-            color: #666; 
-            font-size: 1.2rem; 
-            margin: 0; 
-            font-weight: 400; 
-        }
-
-        .card p { 
-            font-family: 'Luxia', sans-serif; 
-            font-size: 2.8rem; 
-            color: var(--rojo); 
-            margin: 10px 0; 
-            font-weight: 400; 
-        }
-
-        .toolbar { 
+        .card { 
             background: white; 
-            padding: 20px; 
+            padding: 15px; 
             border-radius: 8px; 
-            margin-bottom: 25px; 
-            display: flex; 
-            gap: 20px; 
-            flex-wrap: wrap; 
-            align-items: center; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            border-top: 2px solid var(--rojo); 
+            text-align: center; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05); 
         }
 
-        select { 
-            padding: 10px; 
-            border-radius: 5px; 
-            border: 1px solid #ccc; 
-            font-family: 'Luxia', sans-serif; 
-            min-width: 200px; 
+        .card h3 { color: #666; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 2rem; color: var(--rojo); margin: 5px 0; }
+
+        /* GRID (AJUSTADO A UNA SOLA PÁGINA) */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1.5fr; 
+            gap: 15px; 
+            height: calc(100vh - 260px); 
         }
+
+        .chart-container, .tabla-critica { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* TABLA */
+        .table-wrapper { overflow-y: auto; flex-grow: 1; }
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            border-bottom: 1px solid var(--rojo); 
+            padding: 10px; 
+            text-align: left; 
+            font-size: 0.8rem; 
+            text-transform: uppercase;
+            color: #888;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
+        }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        tr:hover { background: #f9f9f9; cursor: pointer; }
 
         .btn-excel { 
             background: var(--rojo); 
             color: white; 
             border: none; 
-            padding: 12px 25px; 
-            border-radius: 5px; 
+            padding: 8px 18px; 
+            border-radius: 4px; 
             cursor: pointer; 
-            font-family: 'Josefin Slab', serif; 
-            font-size: 1.3rem; 
-            font-weight: 400; 
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 0.85rem; 
             text-transform: uppercase;
         }
 
-        .btn-excel:hover { 
-            background: var(--rojo-hover); 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .resumen-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-            gap: 20px; 
-            margin-bottom: 30px; 
-        }
-
-        .card { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 8px; 
-            border-top: 4px solid var(--rojo); 
-            text-align: center; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-        }
-
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 25px; 
-        }
-
-        .chart-container { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        }
-
-        .tabla-critica { 
-            grid-column: span 2; 
-            background: white; 
-            padding: 25px; 
-            border-radius: 8px; 
-        }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-
-        /* ENCABEZADOS DE TABLA: JOSEFIN SLAB - AJUSTE SOLICITADO */
-        th { 
-            border-bottom: 3px solid var(--rojo); 
-            padding: 15px; 
-            text-align: left; 
-            font-family: 'Josefin Slab', serif; 
-            font-size: 1.6rem; 
-            font-weight: 400; 
-            font-style: normal; /* No cursiva */
-            color: var(--dark);
-        }
-
-        td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 1rem; }
-        tr:hover { background: #f9f9f9; cursor: pointer; }
-
-        #modalDetalles { 
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; top: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        .modal-content { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 10px; 
-            width: 90%; 
-            max-width: 500px; 
-            border-top: 8px solid var(--rojo); 
-        }
-
-        @media (max-width: 768px) { 
-            .dashboard-grid { grid-template-columns: 1fr; } 
-            .tabla-critica { grid-column: span 1; } 
+        @media (max-width: 1100px) {
+            .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
+            body { overflow-y: auto; height: auto; }
         }
     </style>
 </head>
@@ -194,44 +153,44 @@
     <h1>Panel de Control Backlog Aliados: R3</h1>
 
     <div class="toolbar">
-        <div><label>DEPARTAMENTO: </label><select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select></div>
-        <div><label>ALIADO: </label><select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select></div>
-        <button class="btn-excel" onclick="exportarExcel()" style="margin-left: auto;">DESCARGAR REPORTE EXCEL</button>
+        <label>Departamento</label>
+        <select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select>
+        <label>Aliado</label>
+        <select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select>
+        <button class="btn-excel" onclick="exportarExcel()" style="margin-left: auto;">Descargar Excel</button>
     </div>
 
     <div class="resumen-container">
-        <div class="card"><h3>Disponibilidad Global</h3><p id="d-global">0%</p></div>
-        <div class="card"><h3>Sitios con Falla</h3><p id="t-falla">0</p></div>
-        <div class="card"><h3>MTTR (Horas Falla)</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Sede más Crítica</h3><p id="s-critico" style="font-size: 1.4rem;">--</p></div>
+        <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
+        <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
+        <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
+        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.85rem;">--</p></div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución de Fallas</h2><canvas id="cFallas"></canvas></div>
-        <div class="chart-container"><h2>Ranking de Aliados (Fallas)</h2><canvas id="cAliados"></canvas></div>
-        
-        <div class="tabla-critica">
-            <h2>Detalle de Sitios en Backlog (Afectación Total)</h2>
-            <table id="tSitios">
-                <thead>
-                    <tr>
-                        <th>ID / BEN</th>
-                        <th>Sede Educativa</th>
-                        <th>Aliado</th>
-                        <th>Estado</th>
-                        <th>Horas Falla</th>
-                    </tr>
-                </thead>
-                <tbody id="b-tabla"></tbody>
-            </table>
+        <div class="chart-container">
+            <h2>Distribución</h2>
+            <div style="flex-grow:1;"><canvas id="cFallas"></canvas></div>
         </div>
-    </div>
-
-    <div id="modalDetalles">
-        <div class="modal-content">
-            <h2 id="mNom" style="border:none; text-align: left; font-family:'Josefin Slab';"></h2>
-            <div id="mCon"></div>
-            <button onclick="cerrarModal()" style="width:100%; margin-top:20px; padding:10px; background:#333; color:white; border:none; cursor:pointer; font-family:'Luxia'; font-size:1.1rem; font-weight:400;">CERRAR</button>
+        <div class="chart-container">
+            <h2>Ranking Aliados</h2>
+            <div style="flex-grow:1;"><canvas id="cAliados"></canvas></div>
+        </div>
+        <div class="tabla-critica">
+            <h2>Lista de Backlog</h2>
+            <div class="table-wrapper">
+                <table id="tSitios">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Aliado</th>
+                            <th>Estado</th>
+                            <th>Hrs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="b-tabla"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -239,20 +198,28 @@
         let dataFull = [];
         let chart1, chart2;
 
+        Chart.defaults.font.family = 'Roboto';
+        Chart.defaults.font.weight = '400';
+        Chart.defaults.font.size = 11;
+
         async function init() {
             try {
                 const res = await fetch('data_ben.json');
                 dataFull = await res.json();
                 llenarFiltros();
                 render(dataFull);
-            } catch (e) { console.error("Error cargando datos", e); }
+            } catch (e) { console.error("Error cargando JSON", e); }
         }
 
         function llenarFiltros() {
             const dSel = document.getElementById('f-depto');
             const aSel = document.getElementById('f-aliado');
-            [...new Set(dataFull.map(i => i.DEPARTAMENTO))].sort().forEach(d => dSel.add(new Option(d, d)));
-            [...new Set(dataFull.map(i => i.ALIADO))].sort().forEach(a => aSel.add(new Option(a, a)));
+            [...new Set(dataFull.map(i => i.DEPARTAMENTO))].sort().forEach(d => {
+                if(d && d !== "N/A") dSel.add(new Option(d, d));
+            });
+            [...new Set(dataFull.map(i => i.ALIADO))].sort().forEach(a => {
+                if(a && a !== "N/A") aSel.add(new Option(a, a));
+            });
         }
 
         function filtrar() {
@@ -276,53 +243,39 @@
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
                 if(s.disponibilidad < 100) {
-                    tbody.innerHTML += `
-                    <tr onclick="ver('${s.ID}')">
-                        <td>${s.ID}</td><td>${s['NOMBRE DE LA SEDE']}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td><td style="color:var(--rojo)">${s.mttr_horas}h</td>
+                    tbody.innerHTML += `<tr>
+                        <td>${s.ID}</td>
+                        <td>${s.ALIADO}</td>
+                        <td>${s.motivo_falla}</td>
+                        <td style="color:var(--rojo)">${s.mttr_horas.toFixed(1)}h</td>
                     </tr>`;
                 }
             });
 
-            const avg = data.length > 0 ? sDisp / data.length : 0;
-            document.getElementById('d-global').innerText = avg.toFixed(1) + "%";
+            document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / data.length : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
-            document.getElementById('m-promedio').innerText = data.length > 0 ? (sMTTR / data.length).toFixed(1) + "h" : "0h";
+            document.getElementById('m-promedio').innerText = (data.length > 0 ? sMTTR / data.length : 0).toFixed(1) + "h";
+            
+            const critico = data.length > 0 ? data.reduce((p, c) => (p.mttr_horas > c.mttr_horas) ? p : c) : null;
+            document.getElementById('s-critico').innerText = critico ? critico['ID'] : "--";
 
             if(chart1) chart1.destroy();
             if(chart2) chart2.destroy();
 
             chart1 = new Chart(document.getElementById('cFallas'), { 
                 type: 'doughnut', 
-                data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#555', '#999', '#CCC'], borderWidth: 0 }] },
-                options: { plugins: { legend: { position: 'bottom' } } }
+                data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#546E7A', '#90A4AE', '#CFD8DC'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             chart2 = new Chart(document.getElementById('cAliados'), { 
                 type: 'bar', 
-                data: { labels: Object.keys(rankingAliados), datasets: [{ label: 'Sitios con Falla', data: Object.values(rankingAliados), backgroundColor: '#D32F2F' }] },
-                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                data: { labels: Object.keys(rankingAliados), datasets: [{ label: 'Fallas', data: Object.values(rankingAliados), backgroundColor: '#D32F2F' }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
         }
 
-        function ver(id) {
-            const s = dataFull.find(i => i.ID === id);
-            document.getElementById('mNom').innerText = s['NOMBRE DE LA SEDE'];
-            document.getElementById('mCon').innerHTML = `
-                <p><strong>MUNICIPIO:</strong> ${s.MUNICIPIO}</p>
-                <p><strong>ALIADO:</strong> ${s.ALIADO}</p>
-                <p><strong>ESTADO OPERATIVO:</strong> ${s.motivo_falla}</p>
-                <p><strong>HORAS EN ESTADO:</strong> ${s.mttr_horas} horas</p>
-                <p><strong>PROYECTO:</strong> ${s.PROYECTO}</p>`;
-            document.getElementById('modalDetalles').style.display = 'flex';
-        }
-
-        function cerrarModal() { document.getElementById('modalDetalles').style.display = 'none'; }
-
-        function exportarExcel() { 
-            const wb = XLSX.utils.table_to_book(document.getElementById('tSitios'));
-            XLSX.writeFile(wb, "Reporte_Backlog_R3.xlsx"); 
-        }
-
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog_R3.xlsx"); }
         init();
     </script>
 </body>
