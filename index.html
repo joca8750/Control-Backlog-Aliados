@@ -16,7 +16,6 @@
             --texto: #212121; 
         }
 
-        /* CONFIGURACIÓN GLOBAL: ROBOTO, SIN NEGRILLA, SIN CURSIVA */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
@@ -33,49 +32,49 @@
             overflow: hidden; 
         }
 
-        /* TÍTULO PRINCIPAL CENTRADO */
         h1 { 
             text-transform: uppercase; 
             color: var(--rojo); 
             letter-spacing: 1px; 
             text-align: center;
             font-size: 2.2rem; 
-            margin: 15px 0; 
+            margin: 10px 0; 
         }
 
-        /* TÍTULOS DE SECCIONES CENTRADOS - AJUSTE SOLICITADO */
         h2 { 
             color: var(--rojo); 
             font-size: 1.2rem; 
             margin: 0 0 10px 0; 
             text-transform: uppercase;
-            text-align: center; /* Centrado de títulos internos */
+            text-align: center;
         }
 
-        /* BARRA DE FILTROS */
+        /* BARRA DE FILTROS ACTUALIZADA */
         .toolbar { 
             background: white; 
             padding: 10px 20px; 
             border-radius: 8px; 
             margin-bottom: 15px; 
             display: flex; 
-            gap: 20px; 
+            flex-wrap: wrap;
+            gap: 15px; 
             align-items: center; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
         }
 
-        label { font-size: 0.9rem; color: #555; text-transform: uppercase; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+
+        label { font-size: 0.85rem; color: #555; text-transform: uppercase; }
 
         select { 
             padding: 6px 10px; 
             border-radius: 4px; 
             border: 1px solid #ddd; 
-            font-size: 0.9rem;
-            min-width: 180px; 
+            font-size: 0.85rem;
+            min-width: 140px; 
             background: #fff;
         }
 
-        /* TARJETAS KPI */
         .resumen-container { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -85,22 +84,21 @@
 
         .card { 
             background: white; 
-            padding: 15px; 
+            padding: 12px; 
             border-radius: 8px; 
             border-top: 2px solid var(--rojo); 
             text-align: center; 
             box-shadow: 0 3px 6px rgba(0,0,0,0.05); 
         }
 
-        .card h3 { color: #666; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 2rem; color: var(--rojo); margin: 5px 0; }
+        .card h3 { color: #666; font-size: 0.8rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 1.8rem; color: var(--rojo); margin: 5px 0; }
 
-        /* GRID (AJUSTADO A UNA SOLA PÁGINA) */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr 1.5fr; 
             gap: 15px; 
-            height: calc(100vh - 260px); 
+            height: calc(100vh - 280px); 
         }
 
         .chart-container, .tabla-critica { 
@@ -113,14 +111,13 @@
             overflow: hidden;
         }
 
-        /* TABLA */
         .table-wrapper { overflow-y: auto; flex-grow: 1; }
         table { width: 100%; border-collapse: collapse; }
         th { 
             border-bottom: 1px solid var(--rojo); 
             padding: 10px; 
             text-align: left; 
-            font-size: 0.8rem; 
+            font-size: 0.75rem; 
             text-transform: uppercase;
             color: #888;
             position: sticky;
@@ -128,7 +125,7 @@
             background: white;
             z-index: 5;
         }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.8rem; }
         tr:hover { background: #f9f9f9; cursor: pointer; }
 
         .btn-excel { 
@@ -138,8 +135,9 @@
             padding: 8px 18px; 
             border-radius: 4px; 
             cursor: pointer; 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
             text-transform: uppercase;
+            margin-left: auto;
         }
 
         @media (max-width: 1100px) {
@@ -153,18 +151,30 @@
     <h1>Panel de Control Backlog Aliados: R3</h1>
 
     <div class="toolbar">
-        <label>Departamento</label>
-        <select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select>
-        <label>Aliado</label>
-        <select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select>
-        <button class="btn-excel" onclick="exportarExcel()" style="margin-left: auto;">Descargar Excel</button>
+        <div class="filter-group">
+            <label>Depto</label>
+            <select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Aliado</label>
+            <select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Regional</label>
+            <select id="f-regional" onchange="filtrar()"><option value="todos">Todos</option></select>
+        </div>
+        <div class="filter-group">
+            <label>Topología</label>
+            <select id="f-topologia" onchange="filtrar()"><option value="todos">Todos</option></select>
+        </div>
+        <button class="btn-excel" onclick="exportarExcel()">Descargar Excel</button>
     </div>
 
     <div class="resumen-container">
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
         <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.85rem;">--</p></div>
+        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.8rem;">--</p></div>
     </div>
 
     <div class="dashboard-grid">
@@ -212,20 +222,34 @@
         }
 
         function llenarFiltros() {
-            const dSel = document.getElementById('f-depto');
-            const aSel = document.getElementById('f-aliado');
-            [...new Set(dataFull.map(i => i.DEPARTAMENTO))].sort().forEach(d => {
-                if(d && d !== "N/A") dSel.add(new Option(d, d));
-            });
-            [...new Set(dataFull.map(i => i.ALIADO))].sort().forEach(a => {
-                if(a && a !== "N/A") aSel.add(new Option(a, a));
-            });
+            const filtros = {
+                'f-depto': 'DEPARTAMENTO',
+                'f-aliado': 'ALIADO',
+                'f-regional': 'REGIONAL',
+                'f-topologia': 'TOPOLOGIA'
+            };
+
+            for (let id in filtros) {
+                const el = document.getElementById(id);
+                const uniqueValues = [...new Set(dataFull.map(i => i[filtros[id]]))].sort();
+                uniqueValues.forEach(v => {
+                    if(v && v !== "N/A" && v !== "undefined") el.add(new Option(v, v));
+                });
+            }
         }
 
         function filtrar() {
-            const d = document.getElementById('f-depto').value;
-            const a = document.getElementById('f-aliado').value;
-            const res = dataFull.filter(i => (d === "todos" || i.DEPARTAMENTO === d) && (a === "todos" || i.ALIADO === a));
+            const fDepto = document.getElementById('f-depto').value;
+            const fAliado = document.getElementById('f-aliado').value;
+            const fRegional = document.getElementById('f-regional').value;
+            const fTopologia = document.getElementById('f-topologia').value;
+
+            const res = dataFull.filter(i => {
+                return (fDepto === "todos" || i.DEPARTAMENTO === fDepto) &&
+                       (fAliado === "todos" || i.ALIADO === fAliado) &&
+                       (fRegional === "todos" || i.REGIONAL === fRegional) &&
+                       (fTopologia === "todos" || i.TOPOLOGIA === fTopologia);
+            });
             render(res);
         }
 
@@ -275,7 +299,7 @@
             });
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog_R3.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_R3.xlsx"); }
         init();
     </script>
 </body>
