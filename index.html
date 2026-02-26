@@ -27,7 +27,6 @@
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.6rem; margin: 15px 0; letter-spacing: 1px; }
         h2 { color: var(--rojo); font-size: 1.05rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
 
-        /* TOOLBAR CON BOTONES INTERACTIVOS */
         .toolbar { 
             background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; 
             display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
@@ -43,41 +42,35 @@
         .btn {
             padding: 10px 18px; border-radius: 6px; border: none; color: white; 
             text-transform: uppercase; font-size: 0.75rem; cursor: pointer; 
-            display: flex; align-items: center; gap: 6px; 
+            display: flex; align-items: center; justify-content: center; gap: 6px; 
             transition: all 0.2s ease; font-weight: 500 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .btn-excel { background: var(--rojo); }
-        .btn-excel:hover { background: var(--rojo-dark); transform: scale(1.03); box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3); }
+        .btn-excel:hover { background: var(--rojo-dark); transform: scale(1.03); }
         .btn-excel:active { transform: scale(0.98); }
 
         .btn-return { background: var(--azul-return); }
-        .btn-return:hover { background: var(--azul-hover); transform: scale(1.03); box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3); }
-        .btn-return:active { transform: scale(0.98); }
+        .btn-return:hover { background: var(--azul-hover); transform: scale(1.03); }
 
-        /* KPI CARDS */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.3s ease; }
-        .card:hover { transform: translateY(-3px); }
+        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.7rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.6rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
 
-        /* DASHBOARD GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
         .chart-container, .tabla-critica { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .chart-box { height: 350px; position: relative; padding-bottom: 10px; }
 
-        /* TABLA INTERACTIVA */
         .table-wrapper { overflow-x: auto; max-height: 450px; border: 1px solid #f0f0f0; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; min-width: 480px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 12px 5px; text-align: left; font-size: 0.75rem; color: #888; position: sticky; top: 0; background: white; z-index: 5; }
-        td { padding: 12px 5px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background 0.2s; }
+        th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.75rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
+        td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 500 !important; border-left: 3px solid var(--rojo); }
         tr[onclick]:hover td { background-color: #F5F5F5; cursor: pointer; }
 
-        /* Column widths */
         .col-id { width: 18%; }
         .col-aliado { width: 32%; }
         .col-dias { width: 25%; text-align: right; }
@@ -119,7 +112,7 @@
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Ranking Aliado</h2><div class="chart-box"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="titulo-lista">Top 100 Sitios Críticos</h2>
+            <h2 id="titulo-lista">Top 500 Sitios Críticos</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead>
@@ -155,7 +148,6 @@
         function aplicarCambios() {
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
-            
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
@@ -167,17 +159,12 @@
             render(filtrados);
         }
 
-        function seleccionarSitio(id, filaElemento) {
+        function seleccionarSitio(id) {
             const s = dataFull.find(item => item.ID == id);
             if (!s) return;
-            
             selectedId = id;
-            // Actualizar selectores visuales
-            for (let idInput in filtrosIds) { 
-                document.getElementById(idInput).value = s[filtrosIds[idInput]]; 
-            }
-            
-            render([s]); // Filtrar todo por el sitio
+            for (let idInput in filtrosIds) { document.getElementById(idInput).value = s[filtrosIds[idInput]]; }
+            render([s]);
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -191,11 +178,9 @@
         function actualizarSelectores() {
             const actuales = {};
             for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value || 'todos'; }
-
             for (let idTarget in filtrosIds) {
                 const campoTarget = filtrosIds[idTarget];
                 const selectEl = document.getElementById(idTarget);
-                
                 const unicos = [...new Set(dataFull.filter(item => {
                     for (let idSource in filtrosIds) {
                         if (idSource === idTarget) continue;
@@ -204,7 +189,6 @@
                     }
                     return true;
                 }).map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
-
                 const valorPrevio = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
                 unicos.forEach(v => selectEl.add(new Option(v, v)));
@@ -214,8 +198,7 @@
 
         function render(data) {
             const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
-            let sumDisp = 0, sumHrs = 0, nFalla = 0;
-            let mCausas = {}, mAliados = {};
+            let sumDisp = 0, sumHrs = 0, nFalla = 0, mCausas = {}, mAliados = {};
 
             sorted.forEach(s => {
                 sumDisp += s.disponibilidad;
@@ -235,12 +218,13 @@
 
             const tbody = document.getElementById('b-tabla');
             let html = "";
-            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 100);
+            // CAMBIO A TOP 500
+            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 500);
             
             aMostrar.forEach(s => {
                 const isSelected = s.ID == selectedId ? 'selected' : '';
                 const labelHrs = s.mttr_horas === 0 && s.tickets > 0 ? "Pend." : s.mttr_horas.toFixed(1) + "h";
-                html += `<tr class="${isSelected}" onclick="seleccionarSitio('${s.ID}', this)">
+                html += `<tr class="${isSelected}" onclick="seleccionarSitio('${s.ID}')">
                     <td class="col-id">${s.ID}</td>
                     <td class="col-aliado">${s.ALIADO}</td>
                     <td class="col-dias" style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td>
@@ -248,6 +232,9 @@
                 </tr>`;
             });
             tbody.innerHTML = html;
+            
+            // Actualización del título según la cantidad de datos
+            document.getElementById('titulo-lista').innerText = data.length > 500 ? "Top 500 Sitios Críticos" : "Lista de Backlog";
 
             actualizarGraficas(mCausas, mAliados);
         }
@@ -270,7 +257,6 @@
             });
 
             const etiquetas = Object.keys(ranking);
-            // AJUSTE DINÁMICO DE MÁRGENES PARA EL RANKING
             chart2 = new Chart(document.getElementById('cAliados'), {
                 type: 'bar',
                 data: {
@@ -279,18 +265,11 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    layout: { padding: { bottom: 20 } }, // Espacio extra para las etiquetas rotadas
+                    layout: { padding: { bottom: 20 } },
                     plugins: { legend: { display: false } },
                     scales: { 
                         y: { beginAtZero: true, grid: { display: false } },
-                        x: { 
-                            ticks: { 
-                                maxRotation: 45, 
-                                minRotation: 45, 
-                                font: { size: 9 },
-                                autoSkip: false // Obliga a mostrar todos los aliados
-                            } 
-                        }
+                        x: { ticks: { maxRotation: 45, minRotation: 45, font: { size: 9 }, autoSkip: false } }
                     }
                 }
             });
