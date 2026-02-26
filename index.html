@@ -16,13 +16,12 @@
             --texto: #212121; 
         }
 
-        /* RESET GLOBAL: TODO EN ROBOTO, SIN NEGRILLA, SIN CURSIVA */
+        /* CONFIGURACIÓN GLOBAL: ROBOTO, SIN NEGRILLA, SIN CURSIVA */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
-            font-weight: 400 !important;
+            font-weight: 400 !important; 
             font-style: normal !important;
-            -webkit-font-smoothing: antialiased;
         }
 
         body { 
@@ -34,7 +33,6 @@
             overflow: hidden; 
         }
 
-        /* TÍTULO PRINCIPAL CENTRADO */
         h1 { 
             text-transform: uppercase; 
             color: var(--rojo); 
@@ -44,7 +42,6 @@
             margin: 15px 0; 
         }
 
-        /* TÍTULOS DE SECCIONES CENTRADOS */
         h2 { 
             color: var(--rojo); 
             font-size: 1.2rem; 
@@ -67,7 +64,6 @@
         }
 
         .filter-group { display: flex; align-items: center; gap: 8px; }
-
         label { font-size: 0.85rem; color: #555; text-transform: uppercase; }
 
         select { 
@@ -100,7 +96,7 @@
         .card h3 { color: #666; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 2rem; color: var(--rojo); margin: 5px 0; }
 
-        /* GRID DEL DASHBOARD (UNA SOLA PÁGINA) */
+        /* GRID DEL DASHBOARD */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr 1.5fr; 
@@ -119,8 +115,6 @@
         }
 
         .table-wrapper { overflow-y: auto; flex-grow: 1; }
-
-        /* TABLA */
         table { width: 100%; border-collapse: collapse; }
         th { 
             border-bottom: 1px solid var(--rojo); 
@@ -134,10 +128,9 @@
             background: white;
             z-index: 5;
         }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; color: var(--texto); }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
         tr:hover { background: #f9f9f9; }
 
-        /* BOTÓN EXCEL */
         .btn-excel { 
             background: var(--rojo); 
             color: white; 
@@ -153,7 +146,6 @@
         @media (max-width: 1100px) {
             .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
             body { overflow-y: auto; height: auto; }
-            .resumen-container { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -164,19 +156,19 @@
     <div class="toolbar">
         <div class="filter-group">
             <label>Regional</label>
-            <select id="f-regional" onchange="filtrar()"><option value="todos">Todos</option></select>
+            <select id="f-regional" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Depto</label>
-            <select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select>
+            <select id="f-depto" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Aliado</label>
-            <select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select>
+            <select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Topología</label>
-            <select id="f-topologia" onchange="filtrar()"><option value="todos">Todos</option></select>
+            <select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
         </div>
         <button class="btn-excel" onclick="exportarExcel()">Descargar Excel</button>
     </div>
@@ -189,26 +181,13 @@
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container">
-            <h2>Distribución</h2>
-            <div style="flex-grow:1;"><canvas id="cFallas"></canvas></div>
-        </div>
-        <div class="chart-container">
-            <h2>Ranking Aliados</h2>
-            <div style="flex-grow:1;"><canvas id="cAliados"></canvas></div>
-        </div>
+        <div class="chart-container"><h2>Distribución</h2><div style="flex-grow:1;"><canvas id="cFallas"></canvas></div></div>
+        <div class="chart-container"><h2>Ranking Aliados</h2><div style="flex-grow:1;"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
             <h2>Lista de Backlog</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Aliado</th>
-                            <th>Estado</th>
-                            <th>Hrs</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>ID</th><th>Aliado</th><th>Estado</th><th>Hrs</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -219,65 +198,83 @@
         let dataFull = [];
         let chart1, chart2;
 
-        Chart.defaults.font.family = 'Roboto';
-        Chart.defaults.font.weight = '400';
-        Chart.defaults.font.size = 11;
+        const camposFiltros = {
+            'f-regional': 'REGIONAL',
+            'f-depto': 'DEPARTAMENTO',
+            'f-aliado': 'ALIADO',
+            'f-topologia': 'TOPOLOGIA'
+        };
 
         async function init() {
             try {
                 const res = await fetch('data_ben.json');
                 dataFull = await res.json();
-                actualizarFiltrosCascada(dataFull, true);
-                render(dataFull);
+                
+                // Inicializar opciones de filtros por primera vez
+                actualizarOpcionesSelectores();
+                aplicarCambios(); 
             } catch (e) { console.error("Error cargando JSON", e); }
         }
 
-        function actualizarFiltrosCascada(data, inicial = false) {
-            const config = {
-                'f-regional': 'REGIONAL',
-                'f-depto': 'DEPARTAMENTO',
-                'f-aliado': 'ALIADO',
-                'f-topologia': 'TOPOLOGIA'
-            };
+        function aplicarCambios() {
+            const selecciones = {};
+            for (let id in camposFiltros) {
+                selecciones[camposFiltros[id]] = document.getElementById(id).value;
+            }
 
-            for (let id in config) {
-                const el = document.getElementById(id);
-                const valorPrevio = el.value;
-                const campo = config[id];
+            // 1. Filtrar la data principal
+            const filtrados = dataFull.filter(item => {
+                return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
+                       (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
+                       (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
+                       (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA);
+            });
 
-                // Solo actualizamos los filtros que NO son el que el usuario acaba de tocar
-                // (O todos si es la carga inicial)
-                const uniqueValues = [...new Set(data.map(i => i[campo]))]
+            // 2. Actualizar las opciones de los filtros para que sean coherentes (Cascada)
+            actualizarOpcionesSelectores();
+
+            // 3. Renderizar gráficos y tablas
+            render(filtrados);
+        }
+
+        function actualizarOpcionesSelectores() {
+            // Obtenemos qué tiene seleccionado el usuario actualmente
+            const actuales = {};
+            for (let id in camposFiltros) { actuales[id] = document.getElementById(id).value; }
+
+            // Para cada selector (ej: Aliado), calculamos sus opciones basadas en los OTROS filtros
+            for (let idTarget in camposFiltros) {
+                const campoTarget = camposFiltros[idTarget];
+                const selectEl = document.getElementById(idTarget);
+
+                // Filtrar dataFull usando todos los filtros MENOS el actual
+                const dataParaOpciones = dataFull.filter(item => {
+                    for (let idSource in camposFiltros) {
+                        if (idSource === idTarget) continue; // No filtrarse a sí mismo
+                        const valSource = actuales[idSource];
+                        const campoSource = camposFiltros[idSource];
+                        if (valSource !== 'todos' && item[campoSource] !== valSource) return false;
+                    }
+                    return true;
+                });
+
+                // Obtener valores únicos
+                const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))]
                     .filter(v => v && v !== "N/A" && v !== "undefined")
                     .sort();
 
-                el.innerHTML = '<option value="todos">Todos</option>';
-                uniqueValues.forEach(v => {
-                    el.add(new Option(v, v));
+                // Re-poblar el selector
+                const guardado = actuales[idTarget];
+                selectEl.innerHTML = '<option value="todos">Todos</option>';
+                unicos.forEach(v => {
+                    selectEl.add(new Option(v, v));
                 });
 
-                if (!inicial && [...el.options].some(o => o.value === valorPrevio)) {
-                    el.value = valorPrevio;
+                // Restaurar valor si sigue siendo válido
+                if ([...selectEl.options].some(o => o.value === guardado)) {
+                    selectEl.value = guardado;
                 }
             }
-        }
-
-        function filtrar() {
-            const fRegional = document.getElementById('f-regional').value;
-            const fDepto = document.getElementById('f-depto').value;
-            const fAliado = document.getElementById('f-aliado').value;
-            const fTopologia = document.getElementById('f-topologia').value;
-
-            const filtrados = dataFull.filter(i => {
-                return (fRegional === "todos" || i.REGIONAL === fRegional) &&
-                       (fDepto === "todos" || i.DEPARTAMENTO === fDepto) &&
-                       (fAliado === "todos" || i.ALIADO === fAliado) &&
-                       (fTopologia === "todos" || i.TOPOLOGIA === fTopologia);
-            });
-
-            // Si el usuario cambia la Regional, actualizamos las opciones de los otros filtros
-            actualizarFiltrosCascada(filtrados);
-            render(filtrados);
         }
 
         function render(data) {
@@ -294,36 +291,20 @@
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
                 if(s.disponibilidad < 100) {
-                    tbody.innerHTML += `<tr>
-                        <td>${s.ID}</td>
-                        <td>${s.ALIADO}</td>
-                        <td>${s.motivo_falla}</td>
-                        <td style="color:var(--rojo)">${s.mttr_horas.toFixed(1)}h</td>
-                    </tr>`;
+                    tbody.innerHTML += `<tr><td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td><td>${s.mttr_horas.toFixed(1)}h</td></tr>`;
                 }
             });
 
             document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / data.length : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
             document.getElementById('m-promedio').innerText = (data.length > 0 ? sMTTR / data.length : 0).toFixed(1) + "h";
-            
             const critico = data.length > 0 ? data.reduce((p, c) => (p.mttr_horas > c.mttr_horas) ? p : c) : null;
             document.getElementById('s-critico').innerText = critico ? critico['ID'] : "--";
 
             if(chart1) chart1.destroy();
             if(chart2) chart2.destroy();
-
-            chart1 = new Chart(document.getElementById('cFallas'), { 
-                type: 'doughnut', 
-                data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#546E7A', '#90A4AE', '#CFD8DC'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-            });
-
-            chart2 = new Chart(document.getElementById('cAliados'), { 
-                type: 'bar', 
-                data: { labels: Object.keys(rankingAliados), datasets: [{ label: 'Fallas', data: Object.values(rankingAliados), backgroundColor: '#D32F2F' }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
+            chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#546E7A', '#90A4AE', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
+            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: Object.keys(rankingAliados), datasets: [{ label: 'Fallas', data: Object.values(rankingAliados), backgroundColor: '#D32F2F' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }}}});
         }
 
         function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_R3.xlsx"); }
