@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Móvil - Backlog Aliados</title>
+    <title>Dashboard High-Performance - R3</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -20,92 +20,62 @@
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; font-weight: 400 !important; }
 
-        body { 
-            background: var(--gris-fondo); 
-            margin: 0; padding: 10px; 
-            color: var(--texto); 
-            overflow-x: hidden; /* Evita scroll horizontal en móviles */
-        }
+        body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.5rem; margin: 10px 0; }
         h2 { color: var(--rojo); font-size: 1.1rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
 
-        /* TOOLBAR ADAPTABLE */
         .toolbar { 
             background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; 
-            display: flex; flex-direction: column; gap: 12px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
         .filter-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-        label { font-size: 0.75rem; color: #666; text-transform: uppercase; }
+        label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
         
-        /* Selectores más grandes para dedos */
-        select { 
-            padding: 12px; border-radius: 6px; border: 1px solid var(--borde); 
-            font-size: 1rem; width: 100%; background: #fff; appearance: none;
-        }
+        select { padding: 10px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.9rem; width: 100%; background: #fff; }
 
         .btn-container { display: flex; gap: 10px; width: 100%; }
-        .btn-excel, .btn-return { 
-            flex: 1; padding: 12px; border-radius: 6px; border: none; 
-            color: white; text-transform: uppercase; font-size: 0.8rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
+        .btn-excel, .btn-return { flex: 1; padding: 12px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-excel { background: var(--rojo); }
         .btn-return { background: var(--azul-return); }
 
-        /* TARJETAS KPI EN 2 COLUMNAS PARA MÓVIL */
-        .resumen-container { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; 
-        }
-        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .resumen-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; }
         .card h3 { color: #777; font-size: 0.7rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.5rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
 
-        /* DISEÑO VERTICAL (MÓVIL FIRST) */
-        .dashboard-grid { 
-            display: flex; flex-direction: column; gap: 15px; 
-        }
+        .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
+        .chart-container, .tabla-critica { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .chart-container, .tabla-critica { 
-            background: white; padding: 15px; border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); min-height: 300px;
-        }
+        /* Ajuste de altura para que quepan las gráficas */
+        .chart-box { height: 320px; position: relative; }
 
-        .table-wrapper { 
-            overflow-x: auto; /* Permite scroll horizontal solo en la tabla si es necesario */
-            border: 1px solid #f0f0f0; 
-        }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { border-bottom: 2px solid var(--rojo); padding: 10px; text-align: left; font-size: 0.7rem; color: #888; background: white; }
-        td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; }
+        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; border: 1px solid #f0f0f0; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        th { border-bottom: 2px solid var(--rojo); padding: 10px; text-align: left; font-size: 0.7rem; color: #888; position: sticky; top: 0; background: white; }
+        td { padding: 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; }
 
-        /* AJUSTES PARA PANTALLAS GRANDES (PC) */
         @media (min-width: 1024px) {
-            body { padding: 10px 20px; overflow: hidden; height: 100vh; }
-            h1 { font-size: 2.2rem; }
+            body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .toolbar { flex-direction: row; justify-content: center; }
             .filter-group { width: auto; }
-            select { width: 140px; padding: 6px 10px; font-size: 0.85rem; }
-            .btn-container { width: auto; }
+            select { width: 130px; }
             .resumen-container { grid-template-columns: repeat(4, 1fr); }
             .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; height: calc(100vh - 280px); }
-            .card p { font-size: 2.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Backlog Aliados: R3</h1>
+    <h1>Backlog R3 - Performance Mode</h1>
 
     <div class="toolbar">
-        <div class="filter-group"><label>Regional</label><select id="f-regional" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <div class="filter-group"><label>Depto</label><select id="f-depto" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <div class="filter-group"><label>Aliado</label><select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <div class="filter-group"><label>Topología</label><select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <div class="filter-group"><label>Operación</label><select id="f-tipo-operacion" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="aplicarCambios()"></select></div>
+        <div class="filter-group"><label>Depto</label><select id="f-depto" onchange="aplicarCambios()"></select></div>
+        <div class="filter-group"><label>Aliado</label><select id="f-aliado" onchange="aplicarCambios()"></select></div>
+        <div class="filter-group"><label>Topol</label><select id="f-topologia" onchange="aplicarCambios()"></select></div>
+        <div class="filter-group"><label>Operación</label><select id="f-tipo-operacion" onchange="aplicarCambios()"></select></div>
         <div class="btn-container">
             <button class="btn-excel" onclick="exportarExcel()">Excel</button>
             <button class="btn-return" onclick="resetearFiltros()">↺ Return</button>
@@ -120,10 +90,10 @@
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución</h2><div style="height:250px;"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Ranking Aliado</h2><div style="height:250px;"><canvas id="cAliados"></canvas></div></div>
+        <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
+        <div class="chart-container"><h2>Ranking Aliado</h2><div class="chart-box"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
-            <h2>Lista de Backlog</h2>
+            <h2 id="titulo-lista">Top 100 Sitios Críticos</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr><th>ID</th><th>Aliado</th><th style="text-align: right;">Dias</th><th style="text-align: right;">Hrs</th></tr></thead>
@@ -137,8 +107,7 @@
         let dataFull = [];
         let chart1, chart2;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
-        const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
-
+        
         async function init() {
             try {
                 const res = await fetch('data_ben.json');
@@ -151,6 +120,7 @@
         function aplicarCambios() {
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value; }
+            
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
@@ -158,6 +128,7 @@
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
                        (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO);
             });
+
             actualizarSelectores();
             render(filtrados);
         }
@@ -165,14 +136,9 @@
         function seleccionarSitio(id) {
             const sitio = dataFull.find(s => s.ID == id);
             if (!sitio) return;
-            document.getElementById('f-regional').value = sitio.REGIONAL;
-            document.getElementById('f-depto').value = sitio.DEPARTAMENTO;
-            document.getElementById('f-aliado').value = sitio.ALIADO;
-            document.getElementById('f-topologia').value = sitio.TOPOLOGIA;
-            document.getElementById('f-tipo-operacion').value = sitio.PROYECTO;
-            actualizarSelectores();
+            for (let id in filtrosIds) { document.getElementById(id).value = sitio[filtrosIds[id]]; }
             render([sitio]);
-            window.scrollTo({top: 0, behavior: 'smooth'}); // Sube al inicio para ver KPIs
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function resetearFiltros() {
@@ -183,70 +149,111 @@
 
         function actualizarSelectores() {
             const actuales = {};
-            for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value; }
+            for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value || 'todos'; }
+
             for (let idTarget in filtrosIds) {
                 const campoTarget = filtrosIds[idTarget];
                 const selectEl = document.getElementById(idTarget);
-                const dataParaOpciones = dataFull.filter(item => {
+                
+                const unicos = [...new Set(dataFull.filter(item => {
                     for (let idSource in filtrosIds) {
                         if (idSource === idTarget) continue;
-                        const valSource = actuales[idSource];
-                        if (valSource !== 'todos' && item[filtrosIds[idSource]] !== valSource) return false;
+                        const val = actuales[idSource];
+                        if (val !== 'todos' && item[filtrosIds[idSource]] !== val) return false;
                     }
                     return true;
-                });
-                const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
-                const guardado = actuales[idTarget];
+                }).map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
+
+                const valorPrevio = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
                 unicos.forEach(v => selectEl.add(new Option(v, v)));
-                if ([...selectEl.options].some(o => o.value === guardado)) selectEl.value = guardado;
+                selectEl.value = unicos.includes(valorPrevio) ? valorPrevio : 'todos';
             }
         }
 
         function render(data) {
-            const dataOrdenada = [...data].sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
-            let sDisp = 0, tFallas = 0, sMTTR = 0, causas = {}, rankingAliados = {};
-            const tbody = document.getElementById('b-tabla');
-            tbody.innerHTML = "";
+            const totalRecords = data.length;
+            // Ordenamos una sola vez
+            const sorted = data.sort((a, b) => (b.mttr_horas || 0) - (a.mttr_horas || 0));
+            
+            let sumDisp = 0, sumHrs = 0, nFalla = 0;
+            let mCausas = {}, mAliados = {};
 
-            dataOrdenada.forEach(s => {
-                sDisp += s.disponibilidad;
-                if(s.tickets > 0) tFallas++;
-                sMTTR += s.mttr_horas;
-                causas[s.motivo_falla] = (causas[s.motivo_falla] || 0) + 1;
-                rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
-
-                if(s.tickets > 0 || s.disponibilidad < 100) {
-                    const hrs = parseFloat(s.mttr_horas) || 0;
-                    const labelHrs = hrs === 0 && s.tickets > 0 ? "Pend." : hrs.toFixed(1) + "h";
-                    const labelDias = hrs === 0 && s.tickets > 0 ? "Pend." : (hrs/24).toFixed(1) + "d";
-
-                    tbody.innerHTML += `<tr onclick="seleccionarSitio('${s.ID}')">
-                        <td>${s.ID}</td><td>${s.ALIADO}</td>
-                        <td style="text-align: right;">${labelDias}</td>
-                        <td style="color:var(--rojo); text-align: right;">${labelHrs}</td>
-                    </tr>`;
+            // Procesamos la data de forma eficiente (un solo ciclo para todo)
+            for (let i = 0; i < totalRecords; i++) {
+                const s = sorted[i];
+                sumDisp += s.disponibilidad;
+                sumHrs += s.mttr_horas;
+                if (s.tickets > 0) {
+                    nFalla++;
+                    mCausas[s.motivo_falla] = (mCausas[s.motivo_falla] || 0) + 1;
+                    mAliados[s.ALIADO] = (mAliados[s.ALIADO] || 0) + 1;
                 }
+            }
+
+            // Actualizamos KPIs
+            const totalParaPromedio = totalRecords || 1;
+            document.getElementById('d-global').innerText = (sumDisp / totalParaPromedio).toFixed(1) + "%";
+            document.getElementById('t-falla').innerText = nFalla;
+            document.getElementById('m-promedio').innerText = (sumHrs / totalParaPromedio).toFixed(1) + "h";
+            document.getElementById('d-promedio').innerText = (sumHrs / totalParaPromedio / 24).toFixed(1) + "d";
+
+            // Paginación Virtual: Solo pintamos los primeros 100 en la tabla para ganar velocidad
+            const limit = 100;
+            const tbody = document.getElementById('b-tabla');
+            let html = "";
+            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, limit);
+            
+            aMostrar.forEach(s => {
+                const labelHrs = s.mttr_horas === 0 && s.tickets > 0 ? "Pend." : s.mttr_horas.toFixed(1) + "h";
+                html += `<tr onclick="seleccionarSitio('${s.ID}')"><td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;">${labelHrs}</td></tr>`;
             });
+            tbody.innerHTML = html;
+            document.getElementById('titulo-lista').innerText = totalRecords > limit ? `Top ${limit} Sitios Críticos` : "Lista de Backlog";
 
-            const total = data.length > 0 ? data.length : 1;
-            document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / total : 0).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = tFallas;
-            document.getElementById('m-promedio').innerText = (sMTTR / total).toFixed(1) + "h";
-            document.getElementById('d-promedio').innerText = (sMTTR / total / 24).toFixed(1) + "d";
-
-            actualizarGraficas(causas, rankingAliados);
+            actualizarGraficas(mCausas, mAliados);
         }
 
         function actualizarGraficas(causas, ranking) {
             if(chart1) chart1.destroy();
             if(chart2) chart2.destroy();
-            chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#455A64', '#78909C', '#B0BEC5', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
-            const etiquetasAliados = Object.keys(ranking);
-            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }});
+
+            const isMobile = window.innerWidth < 1024;
+
+            // GRAFICA DISTRIBUCIÓN - Ajuste para ver datos completos
+            chart1 = new Chart(document.getElementById('cFallas'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(causas),
+                    datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2'], borderWidth: 0 }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: isMobile ? 'bottom' : 'right', // Se mueve a la derecha en PC para no tapar
+                            labels: { boxWidth: 12, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            const aliados = Object.keys(ranking);
+            chart2 = new Chart(document.getElementById('cAliados'), {
+                type: 'bar',
+                data: {
+                    labels: aliados,
+                    datasets: [{ data: Object.values(ranking), backgroundColor: aliados.map((_, i) => `hsl(${i * 45}, 70%, 50%)`) }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 9 } } } }
+                }
+            });
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte.xlsx"); }
         init();
     </script>
 </body>
