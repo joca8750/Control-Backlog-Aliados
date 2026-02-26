@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regionales - Vista Completa</title>
+    <title>Backlog Regionales - Multi-Dispositivo</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -17,55 +17,65 @@
             --texto: #212121; 
             --borde: #E0E0E0;
             --azul-return: #2c3e50;
-            --azul-hover: #34495e;
         }
 
+        /* RESET & BASE */
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; font-weight: 400 !important; }
-
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.6rem; margin: 15px 0; letter-spacing: 1px; }
-        h2 { color: var(--rojo); font-size: 1.05rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.4rem; margin: 10px 0; letter-spacing: 1px; }
+        h2 { color: var(--rojo); font-size: 1rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
 
+        /* TOOLBAR ADAPTABLE */
         .toolbar { 
-            background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; 
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+            background: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
-        .filter-group { display: flex; flex-direction: column; gap: 4px; }
-        label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
-        select { padding: 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 120px; background: #fff; cursor: pointer; }
+        .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 110px; }
+        label { font-size: 0.65rem; color: #666; text-transform: uppercase; }
+        select { padding: 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.8rem; background: #fff; width: 100%; }
 
-        .btn-container { display: flex; gap: 10px; }
-        .btn { padding: 10px 18px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; font-weight: 500 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-container { display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 5px; }
+        .btn { padding: 10px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500 !important; }
         .btn-excel { background: var(--rojo); }
         .btn-return { background: var(--azul-return); }
-        .btn-return:disabled { background: #95a5a6; cursor: not-allowed; opacity: 0.6; }
+        .btn-return:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* KPI CARDS - 2 COLUMNAS EN MÓVIL, 4 EN PC */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .card p { font-size: 1.6rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
+        .card { background: white; padding: 10px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card h3 { color: #777; font-size: 0.65rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 1.4rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
 
+        /* DASHBOARD GRID - VERTICAL EN MÓVIL, HORIZONTAL EN PC */
         .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
-        .chart-container, .tabla-critica { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
         
-        /* ALTURA DE GRÁFICAS AUMENTADA PARA EVITAR CORTES */
-        .chart-box { height: 380px; position: relative; padding-bottom: 15px; cursor: pointer; }
+        /* ALTURA DE GRÁFICAS */
+        .chart-box { height: 320px; position: relative; width: 100%; cursor: pointer; }
 
-        .table-wrapper { overflow-x: auto; max-height: 450px; border: 1px solid #f0f0f0; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; min-width: 480px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.75rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
-        td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* TABLA CON SCROLL */
+        .table-wrapper { overflow-x: auto; max-height: 400px; border: 1px solid #f0f0f0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; table-layout: fixed; }
+        th { border-bottom: 2px solid var(--rojo); padding: 10px 5px; text-align: left; font-size: 0.7rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
+        td { padding: 10px 5px; border-bottom: 1px solid #f5f5f5; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 500 !important; border-left: 3px solid var(--rojo); }
-        tr[onclick]:hover td { background-color: #F5F5F5; cursor: pointer; }
+        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 3px solid var(--rojo); }
 
+        /* MEDIA QUERIES PARA PC */
         @media (min-width: 1024px) {
-            body { padding: 15px 30px; height: 100vh; overflow: hidden; }
+            body { padding: 15px 25px; height: 100vh; overflow: hidden; }
+            h1 { font-size: 2rem; margin: 15px 0; }
+            .toolbar { padding: 15px 25px; flex-wrap: nowrap; }
+            .btn-container { width: auto; margin-top: 0; }
             .resumen-container { grid-template-columns: repeat(4, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; height: calc(100vh - 280px); }
-            .card p { font-size: 2.2rem; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.1fr 1.5fr; height: calc(100vh - 260px); align-items: start; }
+            .card p { font-size: 2rem; }
+            .chart-box { height: 100%; min-height: 350px; }
+            .tabla-critica { height: 100%; }
+            .table-wrapper { max-height: calc(100% - 40px); }
         }
     </style>
 </head>
@@ -81,7 +91,7 @@
         <div class="filter-group"><label>Operación</label><select id="f-tipo-operacion" onchange="registrarYFiltrar()"></select></div>
         <div class="filter-group"><label>Causa</label><select id="f-causa" onchange="registrarYFiltrar()"></select></div>
         <div class="btn-container">
-            <button class="btn btn-excel" onclick="exportarExcel()">📊 Excel</button>
+            <button class="btn btn-excel" onclick="exportarExcel()">Excel</button>
             <button class="btn btn-return" id="btn-return" onclick="pasoAtras()">↺ Return</button>
         </div>
     </div>
@@ -97,10 +107,10 @@
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Ranking Aliado</h2><div class="chart-box"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="titulo-lista">Top 500 Sitios Críticos</h2>
+            <h2>Top 500 Críticos</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th style="width:18%">ID</th><th style="width:32%">Aliado</th><th style="text-align:right">Dias</th><th style="text-align:right">Hrs</th></tr></thead>
+                    <thead><tr><th style="width:20%">ID</th><th style="width:35%">Aliado</th><th style="text-align:right">Dias</th><th style="text-align:right">Hrs</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -112,11 +122,7 @@
         let chart1, chart2;
         let selectedId = null;
         let historial = [];
-
-        const filtrosIds = {
-            'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 
-            'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO', 'f-causa': 'motivo_falla'
-        };
+        const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO', 'f-causa': 'motivo_falla'};
         const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
 
         async function init() {
@@ -132,19 +138,15 @@
             const estado = { filtros: {}, selectedId: selectedId };
             for (let id in filtrosIds) { estado.filtros[id] = document.getElementById(id).value; }
             historial.push(JSON.stringify(estado));
-            actualizarBotonReturn();
+            document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() {
-            registrarEstado();
-            aplicarCambios(false);
-        }
+        function registrarYFiltrar() { registrarEstado(); aplicarCambios(false); }
 
         function aplicarCambios(conRegistro = true) {
             if (conRegistro) registrarEstado();
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
-            
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
@@ -164,20 +166,18 @@
             selectedId = id;
             for (let idInput in filtrosIds) { document.getElementById(idInput).value = s[filtrosIds[idInput]]; }
             aplicarCambios(false);
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            if(window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function pasoAtras() {
             if (historial.length === 0) return;
-            const ultimoEstado = JSON.parse(historial.pop());
-            for (let id in ultimoEstado.filtros) { document.getElementById(id).value = ultimoEstado.filtros[id]; }
-            selectedId = ultimoEstado.selectedId;
+            const ultimo = JSON.parse(historial.pop());
+            for (let id in ultimo.filtros) { document.getElementById(id).value = ultimo.filtros[id]; }
+            selectedId = ultimo.selectedId;
             actualizarSelectores();
             aplicarCambios(false);
-            actualizarBotonReturn();
+            if (historial.length === 0) document.getElementById('btn-return').disabled = true;
         }
-
-        function actualizarBotonReturn() { document.getElementById('btn-return').disabled = (historial.length === 0); }
 
         function actualizarSelectores() {
             const actuales = {};
@@ -202,76 +202,51 @@
 
         function render(data) {
             const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
-            let sumDisp = 0, sumHrs = 0, nFalla = 0, mCausas = {}, mAliados = {};
+            let sD = 0, sH = 0, nF = 0, mC = {}, mA = {};
             sorted.forEach(s => {
-                sumDisp += s.disponibilidad; sumHrs += s.mttr_horas;
-                if (s.tickets > 0) {
-                    nFalla++;
-                    mCausas[s.motivo_falla] = (mCausas[s.motivo_falla] || 0) + 1;
-                    mAliados[s.ALIADO] = (mAliados[s.ALIADO] || 0) + 1;
-                }
+                sD += s.disponibilidad; sH += s.mttr_horas;
+                if (s.tickets > 0) { nF++; mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1; mA[s.ALIADO] = (mA[s.ALIADO] || 0) + 1; }
             });
-            const total = data.length || 1;
-            document.getElementById('d-global').innerText = (sumDisp / total).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = nFalla;
-            document.getElementById('m-promedio').innerText = (sumHrs / total).toFixed(1) + "h";
-            document.getElementById('d-promedio').innerText = (sumHrs / total / 24).toFixed(1) + "d";
+            const t = data.length || 1;
+            document.getElementById('d-global').innerText = (sD / t).toFixed(1) + "%";
+            document.getElementById('t-falla').innerText = nF;
+            document.getElementById('m-promedio').innerText = (sH / t).toFixed(1) + "h";
+            document.getElementById('d-promedio').innerText = (sH / t / 24).toFixed(1) + "d";
 
             const tbody = document.getElementById('b-tabla');
             let html = "";
-            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 500);
-            aMostrar.forEach(s => {
-                const isSelected = s.ID == selectedId ? 'selected' : '';
-                html += `<tr class="${isSelected}" onclick="seleccionarSitio('${s.ID}')">
+            sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 500).forEach(s => {
+                const isS = s.ID == selectedId ? 'selected' : '';
+                html += `<tr class="${isS}" onclick="seleccionarSitio('${s.ID}')">
                     <td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td>
                     <td style="color:var(--rojo);text-align:right;">${s.mttr_horas === 0 && s.tickets > 0 ? "Pend." : s.mttr_horas.toFixed(1) + "h"}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
-            actualizarGraficas(mCausas, mAliados);
+            actualizarGraficas(mC, mA);
         }
 
         function actualizarGraficas(causas, ranking) {
             if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
-            const isMobile = window.innerWidth < 1024;
-            const labelsCausas = Object.keys(causas);
-
+            const isMob = window.innerWidth < 1024;
+            
             chart1 = new Chart(document.getElementById('cFallas'), {
-                type: 'doughnut', data: { labels: labelsCausas, datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
+                type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
                 options: { 
                     maintainAspectRatio: false, 
-                    layout: { padding: 15 }, // Aire lateral para no tocar bordes
-                    plugins: { legend: { position: isMobile ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 }, padding: 15 } } },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            const causaSeleccionada = labelsCausas[elements[0].index];
-                            registrarEstado();
-                            document.getElementById('f-causa').value = causaSeleccionada;
-                            aplicarCambios(false);
-                        }
-                    }
+                    plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } } },
+                    onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}
                 }
             });
 
-            const etiquetasAliados = Object.keys(ranking);
+            const eA = Object.keys(ranking);
             chart2 = new Chart(document.getElementById('cAliados'), {
-                type: 'bar', data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] },
+                type: 'bar', data: { labels: eA, datasets: [{ data: Object.values(ranking), backgroundColor: eA.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] },
                 options: { 
-                    maintainAspectRatio: false, 
-                    layout: { padding: { bottom: 40, left: 10, right: 10, top: 10 } }, // Mucho espacio inferior para nombres rotados
+                    maintainAspectRatio: false, layout: { padding: { bottom: 30 } },
                     plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { beginAtZero: true, grid: { display: false } }, 
-                        x: { ticks: { maxRotation: 45, minRotation: 45, font: { size: 9 }, autoSkip: false, padding: 10 } } 
-                    },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            const aliadoSeleccionado = etiquetasAliados[elements[0].index];
-                            registrarEstado();
-                            document.getElementById('f-aliado').value = aliadoSeleccionado;
-                            aplicarCambios(false);
-                        }
-                    }
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { ticks: { maxRotation: 45, minRotation: 45, font: { size: 8 }, autoSkip: false } } },
+                    onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-aliado').value = eA[el[0].index]; aplicarCambios(false); }}
                 }
             });
         }
