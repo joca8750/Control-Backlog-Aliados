@@ -209,8 +209,6 @@
             try {
                 const res = await fetch('data_ben.json');
                 dataFull = await res.json();
-                
-                // Inicializar opciones de filtros por primera vez
                 actualizarOpcionesSelectores();
                 aplicarCambios(); 
             } catch (e) { console.error("Error cargando JSON", e); }
@@ -222,7 +220,6 @@
                 selecciones[camposFiltros[id]] = document.getElementById(id).value;
             }
 
-            // 1. Filtrar la data principal
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
@@ -230,27 +227,21 @@
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA);
             });
 
-            // 2. Actualizar las opciones de los filtros para que sean coherentes (Cascada)
             actualizarOpcionesSelectores();
-
-            // 3. Renderizar gráficos y tablas
             render(filtrados);
         }
 
         function actualizarOpcionesSelectores() {
-            // Obtenemos qué tiene seleccionado el usuario actualmente
             const actuales = {};
             for (let id in camposFiltros) { actuales[id] = document.getElementById(id).value; }
 
-            // Para cada selector (ej: Aliado), calculamos sus opciones basadas en los OTROS filtros
             for (let idTarget in camposFiltros) {
                 const campoTarget = camposFiltros[idTarget];
                 const selectEl = document.getElementById(idTarget);
 
-                // Filtrar dataFull usando todos los filtros MENOS el actual
                 const dataParaOpciones = dataFull.filter(item => {
                     for (let idSource in camposFiltros) {
-                        if (idSource === idTarget) continue; // No filtrarse a sí mismo
+                        if (idSource === idTarget) continue;
                         const valSource = actuales[idSource];
                         const campoSource = camposFiltros[idSource];
                         if (valSource !== 'todos' && item[campoSource] !== valSource) return false;
@@ -258,19 +249,16 @@
                     return true;
                 });
 
-                // Obtener valores únicos
                 const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))]
                     .filter(v => v && v !== "N/A" && v !== "undefined")
                     .sort();
 
-                // Re-poblar el selector
                 const guardado = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
                 unicos.forEach(v => {
                     selectEl.add(new Option(v, v));
                 });
 
-                // Restaurar valor si sigue siendo válido
                 if ([...selectEl.options].some(o => o.value === guardado)) {
                     selectEl.value = guardado;
                 }
@@ -278,12 +266,15 @@
         }
 
         function render(data) {
+            // ORDENAMIENTO: De mayor a menor horas (mttr_horas)
+            const dataOrdenada = [...data].sort((a, b) => b.mttr_horas - a.mttr_horas);
+
             let sDisp = 0, tFallas = 0, sMTTR = 0;
             let causas = {}, rankingAliados = {};
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
 
-            data.forEach(s => {
+            dataOrdenada.forEach(s => {
                 sDisp += s.disponibilidad;
                 if(s.tickets > 0) tFallas++;
                 sMTTR += s.mttr_horas;
