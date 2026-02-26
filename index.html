@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard R3 - Backlog Aliados</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Móvil - Backlog Aliados</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,103 +12,121 @@
     <style>
         :root { 
             --rojo: #D32F2F; 
-            --rojo-oscuro: #B71C1C;
             --gris-fondo: #F4F7F6; 
             --texto: #212121; 
             --borde: #E0E0E0;
             --azul-return: #2c3e50;
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif !important;
-            font-weight: 400 !important; 
-            font-style: normal !important;
-        }
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; font-weight: 400 !important; }
 
         body { 
             background: var(--gris-fondo); 
-            margin: 0; padding: 10px 20px; 
+            margin: 0; padding: 10px; 
             color: var(--texto); 
-            height: 100vh; overflow: hidden; 
+            overflow-x: hidden; /* Evita scroll horizontal en móviles */
         }
 
-        h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 15px 0; }
-        h2 { color: var(--rojo); font-size: 1.2rem; margin: 0 0 12px 0; text-transform: uppercase; text-align: center; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.5rem; margin: 10px 0; }
+        h2 { color: var(--rojo); font-size: 1.1rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
 
+        /* TOOLBAR ADAPTABLE */
         .toolbar { 
-            background: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
-            display: flex; flex-wrap: wrap; gap: 15px; 
-            align-items: center; justify-content: center; 
+            background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; 
+            display: flex; flex-direction: column; gap: 12px; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
-        .filter-group { display: flex; align-items: center; gap: 8px; }
-        label { font-size: 0.85rem; color: #666; text-transform: uppercase; }
-        select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 140px; background: #fff; outline: none; }
-
-        .btn-excel { background: var(--rojo); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; transition: background 0.3s; }
-        .btn-return { 
-            background: var(--azul-return); color: white; border: none; padding: 10px 22px; border-radius: 4px; 
-            cursor: pointer; font-size: 0.85rem; text-transform: uppercase;
-            transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            display: flex; align-items: center; gap: 5px;
+        .filter-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        label { font-size: 0.75rem; color: #666; text-transform: uppercase; }
+        
+        /* Selectores más grandes para dedos */
+        select { 
+            padding: 12px; border-radius: 6px; border: 1px solid var(--borde); 
+            font-size: 1rem; width: 100%; background: #fff; appearance: none;
         }
-        .btn-return:hover { background: #34495e; transform: translateY(-2px); }
 
-        .resumen-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
-        .card { background: white; padding: 15px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
-        .card h3 { color: #777; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 2.2rem; color: var(--rojo); margin: 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn-container { display: flex; gap: 10px; width: 100%; }
+        .btn-excel, .btn-return { 
+            flex: 1; padding: 12px; border-radius: 6px; border: none; 
+            color: white; text-transform: uppercase; font-size: 0.8rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-excel { background: var(--rojo); }
+        .btn-return { background: var(--azul-return); }
 
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 15px; height: calc(100vh - 280px); }
-        .chart-container, .tabla-critica { background: white; padding: 18px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; }
+        /* TARJETAS KPI EN 2 COLUMNAS PARA MÓVIL */
+        .resumen-container { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; 
+        }
+        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card h3 { color: #777; font-size: 0.7rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 1.5rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
 
-        .table-wrapper { overflow-y: auto; flex-grow: 1; border: 1px solid #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; }
-        th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
-        td { padding: 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.85rem; }
-        tr[onclick] { cursor: pointer; transition: background 0.2s; }
-        tr[onclick]:hover { background: #FEEBEB; }
+        /* DISEÑO VERTICAL (MÓVIL FIRST) */
+        .dashboard-grid { 
+            display: flex; flex-direction: column; gap: 15px; 
+        }
+
+        .chart-container, .tabla-critica { 
+            background: white; padding: 15px; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); min-height: 300px;
+        }
+
+        .table-wrapper { 
+            overflow-x: auto; /* Permite scroll horizontal solo en la tabla si es necesario */
+            border: 1px solid #f0f0f0; 
+        }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        th { border-bottom: 2px solid var(--rojo); padding: 10px; text-align: left; font-size: 0.7rem; color: #888; background: white; }
+        td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; }
+
+        /* AJUSTES PARA PANTALLAS GRANDES (PC) */
+        @media (min-width: 1024px) {
+            body { padding: 10px 20px; overflow: hidden; height: 100vh; }
+            h1 { font-size: 2.2rem; }
+            .toolbar { flex-direction: row; justify-content: center; }
+            .filter-group { width: auto; }
+            select { width: 140px; padding: 6px 10px; font-size: 0.85rem; }
+            .btn-container { width: auto; }
+            .resumen-container { grid-template-columns: repeat(4, 1fr); }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; height: calc(100vh - 280px); }
+            .card p { font-size: 2.2rem; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Panel de Control Backlog Aliados: R3</h1>
+    <h1>Backlog Aliados: R3</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Regional</label><select id="f-regional" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
         <div class="filter-group"><label>Depto</label><select id="f-depto" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
         <div class="filter-group"><label>Aliado</label><select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
         <div class="filter-group"><label>Topología</label><select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <div class="filter-group"><label>Tipo Operación</label><select id="f-tipo-operacion" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
-        <button class="btn-excel" onclick="exportarExcel()">Excel</button>
-        <button class="btn-return" onclick="resetearFiltros()">↺ Return</button>
+        <div class="filter-group"><label>Operación</label><select id="f-tipo-operacion" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <div class="btn-container">
+            <button class="btn-excel" onclick="exportarExcel()">Excel</button>
+            <button class="btn-return" onclick="resetearFiltros()">↺ Return</button>
+        </div>
     </div>
 
     <div class="resumen-container">
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
-        <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
-        <div class="card)<h3>Promedio Días</h3><p id="d-promedio">0d</p></div>
+        <div class="card"><h3>Prom. Horas</h3><p id="m-promedio">0h</p></div>
+        <div class="card"><h3>Prom. Días</h3><p id="d-promedio">0d</p></div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución</h2><div style="flex-grow:1;"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Ranking Aliado</h2><div style="flex-grow:1;"><canvas id="cAliados"></canvas></div></div>
+        <div class="chart-container"><h2>Distribución</h2><div style="height:250px;"><canvas id="cFallas"></canvas></div></div>
+        <div class="chart-container"><h2>Ranking Aliado</h2><div style="height:250px;"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
             <h2>Lista de Backlog</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Aliado</th>
-                            <th>Estado</th>
-                            <th style="text-align: right;">Dias</th>
-                            <th style="text-align: right;">Hrs</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>ID</th><th>Aliado</th><th style="text-align: right;">Dias</th><th style="text-align: right;">Hrs</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -118,10 +136,7 @@
     <script>
         let dataFull = [];
         let chart1, chart2;
-        const filtrosIds = {
-            'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 
-            'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'
-        };
+        const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
         const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
 
         async function init() {
@@ -157,6 +172,7 @@
             document.getElementById('f-tipo-operacion').value = sitio.PROYECTO;
             actualizarSelectores();
             render([sitio]);
+            window.scrollTo({top: 0, behavior: 'smooth'}); // Sube al inicio para ver KPIs
         }
 
         function resetearFiltros() {
@@ -188,7 +204,6 @@
         }
 
         function render(data) {
-            // Ordenar de mayor a menor horas
             const dataOrdenada = [...data].sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
             let sDisp = 0, tFallas = 0, sMTTR = 0, causas = {}, rankingAliados = {};
             const tbody = document.getElementById('b-tabla');
@@ -201,15 +216,13 @@
                 causas[s.motivo_falla] = (causas[s.motivo_falla] || 0) + 1;
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
-                // CORRECCIÓN LÓGICA: Mostrar si hay ticket activo O si la disponibilidad es menor a 100
                 if(s.tickets > 0 || s.disponibilidad < 100) {
                     const hrs = parseFloat(s.mttr_horas) || 0;
-                    const dias = (hrs / 24).toFixed(1);
-                    const labelHrs = hrs === 0 && s.tickets > 0 ? "Pendiente" : hrs.toFixed(1) + "h";
-                    const labelDias = hrs === 0 && s.tickets > 0 ? "Pendiente" : dias + "d";
+                    const labelHrs = hrs === 0 && s.tickets > 0 ? "Pend." : hrs.toFixed(1) + "h";
+                    const labelDias = hrs === 0 && s.tickets > 0 ? "Pend." : (hrs/24).toFixed(1) + "d";
 
                     tbody.innerHTML += `<tr onclick="seleccionarSitio('${s.ID}')">
-                        <td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td>
+                        <td>${s.ID}</td><td>${s.ALIADO}</td>
                         <td style="text-align: right;">${labelDias}</td>
                         <td style="color:var(--rojo); text-align: right;">${labelHrs}</td>
                     </tr>`;
@@ -217,13 +230,10 @@
             });
 
             const total = data.length > 0 ? data.length : 1;
-            const avgHours = sMTTR / total;
-            const avgDays = avgHours / 24;
-
             document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / total : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
-            document.getElementById('m-promedio').innerText = avgHours.toFixed(1) + "h";
-            document.getElementById('d-promedio').innerText = avgDays.toFixed(1) + "d";
+            document.getElementById('m-promedio').innerText = (sMTTR / total).toFixed(1) + "h";
+            document.getElementById('d-promedio').innerText = (sMTTR / total / 24).toFixed(1) + "d";
 
             actualizarGraficas(causas, rankingAliados);
         }
@@ -233,7 +243,7 @@
             if(chart2) chart2.destroy();
             chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#455A64', '#78909C', '#B0BEC5', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
             const etiquetasAliados = Object.keys(ranking);
-            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }});
+            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }});
         }
 
         function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
