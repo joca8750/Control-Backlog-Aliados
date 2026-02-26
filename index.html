@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Filtro Dinámico</title>
+    <title>Backlog Regional - Sincronización Total</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -23,7 +23,7 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.2rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.25rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
 
         /* TOOLBAR */
@@ -45,7 +45,7 @@
         select:hover { border-color: var(--rojo); background-color: var(--hover-selector); }
 
         .btn-container { display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 5px; }
-        .btn { padding: 8px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.2s; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.2s; }
         .btn-excel { background: #2e7d32; }
         .btn-return { background: var(--azul-return); }
         .btn-return:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -56,7 +56,7 @@
         .card h3 { color: #777; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
-        /* GRID */
+        /* DASHBOARD GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
         .chart-box { height: 260px; position: relative; width: 100%; cursor: pointer; }
@@ -106,7 +106,7 @@
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Backlog Activo (≥ 1 Día)</h2>
+            <h2 id="table-title">Cargando datos...</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr><th style="width:25%">ID</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
@@ -132,7 +132,7 @@
                 dataFull = await res.json();
                 actualizarSelectores();
                 aplicarCambios(false);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Error cargando JSON:", e); }
         }
 
         function registrarEstado() {
@@ -142,35 +142,29 @@
             document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() { 
-            currentDayFilter = null; selectedId = null;
-            registrarEstado(); aplicarCambios(false); 
-        }
+        function registrarYFiltrar() { currentDayFilter = null; selectedId = null; registrarEstado(); aplicarCambios(false); }
 
-        function filtrarPorRangoDias(rango) { 
-            selectedId = null;
-            registrarEstado(); currentDayFilter = rango; aplicarCambios(false); 
-        }
+        function filtrarPorRangoDias(rango) { selectedId = null; registrarEstado(); currentDayFilter = rango; aplicarCambios(false); }
 
         function aplicarCambios(conRegistro = true) {
             if (conRegistro) registrarEstado();
-            
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
+            // FILTRADO DINÁMICO TOTAL
             let filtrados = dataFull.filter(item => {
-                const matchFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
+                const cumpleFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
                        (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
                        (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO) &&
                        (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
 
-                if (!matchFiltros) return false;
+                if (!cumpleFiltros) return false;
 
-                // FILTRADO DINÁMICO POR GRÁFICA DE DÍAS
+                const d = item.mttr_horas / 24;
+                // SI HAY UN FILTRO DE LA GRÁFICA DE DÍAS, REDUCIMOS EL UNIVERSO DE DATOS
                 if (currentDayFilter) {
-                    const d = item.mttr_horas / 24;
                     if (currentDayFilter === '>60') return d > 60;
                     if (currentDayFilter === '45-60') return d > 45 && d <= 60;
                     if (currentDayFilter === '30-45') return d > 30 && d <= 45;
@@ -234,6 +228,7 @@
             sorted.forEach(s => {
                 sD += s.disponibilidad; 
                 const d = s.mttr_horas / 24;
+                // SINCRONIZACIÓN: SOLO CONTAMOS BACKLOG ACTIVO (TICKET Y >= 1 DÍA)
                 if (s.tickets > 0 && d >= 1) {
                     nF++; sH += s.mttr_horas;
                     mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1;
@@ -246,16 +241,18 @@
                 }
             });
 
-            // AQUÍ SE FILTRA EL TOTAL SITIOS AL SELECCIONAR GRÁFICAS
+            // EL "TOTAL SITIOS" AHORA ES DINÁMICO SEGÚN LA SELECCIÓN
             document.getElementById('t-sitios').innerText = data.length; 
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = nF; 
+            document.getElementById('t-falla').innerText = nF; // COINCIDENCIA TOTAL CON GRÁFICA
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
-            sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1).forEach(s => {
+            // LA TABLA SOLO MUESTRA LOS SITIOS DEL BACKLOG (D >= 1)
+            const listaFiltrada = sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1);
+            listaFiltrada.forEach(s => {
                 const tr = document.createElement('tr');
                 if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => seleccionarSitio(s.ID);
@@ -263,7 +260,7 @@
                 tbody.appendChild(tr);
             });
             
-            document.getElementById('table-title').innerText = currentDayFilter ? `Filtrado: ${currentDayFilter} Días` : "Backlog Activo (≥ 1 Día)";
+            document.getElementById('table-title').innerText = currentDayFilter ? `Filtrado: ${currentDayFilter} Días` : `Backlog Activo (${nF} sitios)`;
             actualizarGraficas(mC, r_dias);
         }
 
