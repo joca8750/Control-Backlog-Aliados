@@ -16,11 +16,13 @@
             --texto: #212121; 
         }
 
+        /* RESET GLOBAL: TODO EN ROBOTO, SIN NEGRILLA, SIN CURSIVA */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
-            font-weight: 400 !important; 
+            font-weight: 400 !important;
             font-style: normal !important;
+            -webkit-font-smoothing: antialiased;
         }
 
         body { 
@@ -32,15 +34,17 @@
             overflow: hidden; 
         }
 
+        /* TÍTULO PRINCIPAL CENTRADO */
         h1 { 
             text-transform: uppercase; 
             color: var(--rojo); 
             letter-spacing: 1px; 
             text-align: center;
             font-size: 2.2rem; 
-            margin: 10px 0; 
+            margin: 15px 0; 
         }
 
+        /* TÍTULOS DE SECCIONES CENTRADOS */
         h2 { 
             color: var(--rojo); 
             font-size: 1.2rem; 
@@ -49,7 +53,7 @@
             text-align: center;
         }
 
-        /* BARRA DE FILTROS ACTUALIZADA */
+        /* BARRA DE FILTROS */
         .toolbar { 
             background: white; 
             padding: 10px 20px; 
@@ -71,10 +75,12 @@
             border-radius: 4px; 
             border: 1px solid #ddd; 
             font-size: 0.85rem;
-            min-width: 140px; 
+            min-width: 150px; 
             background: #fff;
+            outline: none;
         }
 
+        /* TARJETAS KPI */
         .resumen-container { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -84,21 +90,22 @@
 
         .card { 
             background: white; 
-            padding: 12px; 
+            padding: 15px; 
             border-radius: 8px; 
             border-top: 2px solid var(--rojo); 
             text-align: center; 
             box-shadow: 0 3px 6px rgba(0,0,0,0.05); 
         }
 
-        .card h3 { color: #666; font-size: 0.8rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 1.8rem; color: var(--rojo); margin: 5px 0; }
+        .card h3 { color: #666; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 2rem; color: var(--rojo); margin: 5px 0; }
 
+        /* GRID DEL DASHBOARD (UNA SOLA PÁGINA) */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr 1.5fr; 
             gap: 15px; 
-            height: calc(100vh - 280px); 
+            height: calc(100vh - 270px); 
         }
 
         .chart-container, .tabla-critica { 
@@ -112,12 +119,14 @@
         }
 
         .table-wrapper { overflow-y: auto; flex-grow: 1; }
+
+        /* TABLA */
         table { width: 100%; border-collapse: collapse; }
         th { 
             border-bottom: 1px solid var(--rojo); 
             padding: 10px; 
             text-align: left; 
-            font-size: 0.75rem; 
+            font-size: 0.8rem; 
             text-transform: uppercase;
             color: #888;
             position: sticky;
@@ -125,9 +134,10 @@
             background: white;
             z-index: 5;
         }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.8rem; }
-        tr:hover { background: #f9f9f9; cursor: pointer; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; color: var(--texto); }
+        tr:hover { background: #f9f9f9; }
 
+        /* BOTÓN EXCEL */
         .btn-excel { 
             background: var(--rojo); 
             color: white; 
@@ -135,7 +145,7 @@
             padding: 8px 18px; 
             border-radius: 4px; 
             cursor: pointer; 
-            font-size: 0.8rem; 
+            font-size: 0.85rem; 
             text-transform: uppercase;
             margin-left: auto;
         }
@@ -143,6 +153,7 @@
         @media (max-width: 1100px) {
             .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
             body { overflow-y: auto; height: auto; }
+            .resumen-container { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -152,16 +163,16 @@
 
     <div class="toolbar">
         <div class="filter-group">
+            <label>Regional</label>
+            <select id="f-regional" onchange="filtrar()"><option value="todos">Todos</option></select>
+        </div>
+        <div class="filter-group">
             <label>Depto</label>
             <select id="f-depto" onchange="filtrar()"><option value="todos">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Aliado</label>
             <select id="f-aliado" onchange="filtrar()"><option value="todos">Todos</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Regional</label>
-            <select id="f-regional" onchange="filtrar()"><option value="todos">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Topología</label>
@@ -174,7 +185,7 @@
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
         <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.8rem;">--</p></div>
+        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.85rem;">--</p></div>
     </div>
 
     <div class="dashboard-grid">
@@ -216,41 +227,57 @@
             try {
                 const res = await fetch('data_ben.json');
                 dataFull = await res.json();
-                llenarFiltros();
+                actualizarFiltrosCascada(dataFull, true);
                 render(dataFull);
             } catch (e) { console.error("Error cargando JSON", e); }
         }
 
-        function llenarFiltros() {
-            const filtros = {
+        function actualizarFiltrosCascada(data, inicial = false) {
+            const config = {
+                'f-regional': 'REGIONAL',
                 'f-depto': 'DEPARTAMENTO',
                 'f-aliado': 'ALIADO',
-                'f-regional': 'REGIONAL',
                 'f-topologia': 'TOPOLOGIA'
             };
 
-            for (let id in filtros) {
+            for (let id in config) {
                 const el = document.getElementById(id);
-                const uniqueValues = [...new Set(dataFull.map(i => i[filtros[id]]))].sort();
+                const valorPrevio = el.value;
+                const campo = config[id];
+
+                // Solo actualizamos los filtros que NO son el que el usuario acaba de tocar
+                // (O todos si es la carga inicial)
+                const uniqueValues = [...new Set(data.map(i => i[campo]))]
+                    .filter(v => v && v !== "N/A" && v !== "undefined")
+                    .sort();
+
+                el.innerHTML = '<option value="todos">Todos</option>';
                 uniqueValues.forEach(v => {
-                    if(v && v !== "N/A" && v !== "undefined") el.add(new Option(v, v));
+                    el.add(new Option(v, v));
                 });
+
+                if (!inicial && [...el.options].some(o => o.value === valorPrevio)) {
+                    el.value = valorPrevio;
+                }
             }
         }
 
         function filtrar() {
+            const fRegional = document.getElementById('f-regional').value;
             const fDepto = document.getElementById('f-depto').value;
             const fAliado = document.getElementById('f-aliado').value;
-            const fRegional = document.getElementById('f-regional').value;
             const fTopologia = document.getElementById('f-topologia').value;
 
-            const res = dataFull.filter(i => {
-                return (fDepto === "todos" || i.DEPARTAMENTO === fDepto) &&
+            const filtrados = dataFull.filter(i => {
+                return (fRegional === "todos" || i.REGIONAL === fRegional) &&
+                       (fDepto === "todos" || i.DEPARTAMENTO === fDepto) &&
                        (fAliado === "todos" || i.ALIADO === fAliado) &&
-                       (fRegional === "todos" || i.REGIONAL === fRegional) &&
                        (fTopologia === "todos" || i.TOPOLOGIA === fTopologia);
             });
-            render(res);
+
+            // Si el usuario cambia la Regional, actualizamos las opciones de los otros filtros
+            actualizarFiltrosCascada(filtrados);
+            render(filtrados);
         }
 
         function render(data) {
