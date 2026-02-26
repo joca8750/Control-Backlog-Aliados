@@ -16,9 +16,10 @@
             --gris-fondo: #F4F7F6; 
             --texto: #212121; 
             --borde: #E0E0E0;
+            --azul-return: #2c3e50;
         }
 
-        /* ESTILO GLOBAL: SIN NEGRILLAS, SIN CURSIVAS */
+        /* ESTILO GLOBAL: ROBOTO NORMAL, SIN NEGRILLAS NI CURSIVAS */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
@@ -36,12 +37,11 @@
         h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 15px 0; }
         h2 { color: var(--rojo); font-size: 1.2rem; margin: 0 0 12px 0; text-transform: uppercase; text-align: center; }
 
-        /* TOOLBAR CENTRADO */
+        /* TOOLBAR CENTRADO Y DINÁMICO */
         .toolbar { 
             background: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
-            display: flex; flex-wrap: wrap; gap: 20px; 
-            align-items: center; 
-            justify-content: center; 
+            display: flex; flex-wrap: wrap; gap: 15px; 
+            align-items: center; justify-content: center; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
@@ -54,7 +54,7 @@
         .btn-excel:hover { background: var(--rojo-oscuro); }
 
         .btn-return { 
-            background: #2c3e50; color: white; border: none; padding: 10px 22px; border-radius: 4px; 
+            background: var(--azul-return); color: white; border: none; padding: 10px 22px; border-radius: 4px; 
             cursor: pointer; font-size: 0.85rem; text-transform: uppercase;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -62,7 +62,7 @@
         }
         .btn-return:hover { background: #34495e; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
 
-        /* TARJETAS KPI */
+        /* TARJETAS KPI (PROMEDIO DÍAS IGUAL A PROMEDIO HORAS) */
         .resumen-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
         .card { background: white; padding: 15px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
@@ -166,15 +166,21 @@
             render(filtrados);
         }
 
+        // SELECCIÓN DE SITIO: ACTUALIZA FILTROS, KPIs Y GRÁFICAS
         function seleccionarSitio(id) {
             const sitio = dataFull.find(s => s.ID == id);
             if (!sitio) return;
+
+            // Inyectar valores del sitio en los filtros
             document.getElementById('f-regional').value = sitio.REGIONAL;
             document.getElementById('f-depto').value = sitio.DEPARTAMENTO;
             document.getElementById('f-aliado').value = sitio.ALIADO;
             document.getElementById('f-topologia').value = sitio.TOPOLOGIA;
             document.getElementById('f-tipo-operacion').value = sitio.PROYECTO;
-            aplicarCambios();
+
+            // Sincronizar selectores y renderizar solo este sitio
+            actualizarSelectores();
+            render([sitio]);
         }
 
         function resetearFiltros() {
@@ -229,10 +235,11 @@
                 }
             });
 
-            const avgHours = data.length > 0 ? sMTTR / data.length : 0;
+            const total = data.length > 0 ? data.length : 1;
+            const avgHours = sMTTR / total;
             const avgDays = avgHours / 24;
 
-            document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / data.length : 0).toFixed(1) + "%";
+            document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / total : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
             document.getElementById('m-promedio').innerText = avgHours.toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = avgDays.toFixed(1) + "d";
