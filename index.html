@@ -19,7 +19,6 @@
             --azul-return: #2c3e50;
         }
 
-        /* ESTILO GLOBAL: ROBOTO NORMAL, SIN NEGRILLAS NI CURSIVAS */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
@@ -37,7 +36,6 @@
         h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 15px 0; }
         h2 { color: var(--rojo); font-size: 1.2rem; margin: 0 0 12px 0; text-transform: uppercase; text-align: center; }
 
-        /* TOOLBAR CENTRADO Y DINÁMICO */
         .toolbar { 
             background: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
             display: flex; flex-wrap: wrap; gap: 15px; 
@@ -49,42 +47,29 @@
         label { font-size: 0.85rem; color: #666; text-transform: uppercase; }
         select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 140px; background: #fff; outline: none; }
 
-        /* BOTONES */
         .btn-excel { background: var(--rojo); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; transition: background 0.3s; }
-        .btn-excel:hover { background: var(--rojo-oscuro); }
-
         .btn-return { 
             background: var(--azul-return); color: white; border: none; padding: 10px 22px; border-radius: 4px; 
             cursor: pointer; font-size: 0.85rem; text-transform: uppercase;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             display: flex; align-items: center; gap: 5px;
         }
-        .btn-return:hover { background: #34495e; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn-return:hover { background: #34495e; transform: translateY(-2px); }
 
-        /* TARJETAS KPI (PROMEDIO DÍAS IGUAL A PROMEDIO HORAS) */
         .resumen-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
         .card { background: white; padding: 15px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 2.2rem; color: var(--rojo); margin: 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* DASHBOARD GRID */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 15px; height: calc(100vh - 280px); }
         .chart-container, .tabla-critica { background: white; padding: 18px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; }
 
-        /* TABLA */
         .table-wrapper { overflow-y: auto; flex-grow: 1; border: 1px solid #f0f0f0; }
         table { width: 100%; border-collapse: collapse; }
         th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.85rem; }
         tr[onclick] { cursor: pointer; transition: background 0.2s; }
         tr[onclick]:hover { background: #FEEBEB; }
-
-        @media (max-width: 1200px) {
-            .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
-            body { overflow-y: auto; height: auto; }
-            .resumen-container { grid-template-columns: 1fr 1fr; }
-        }
     </style>
 </head>
 <body>
@@ -105,7 +90,7 @@
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
         <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Promedio Días</h3><p id="d-promedio">0d</p></div>
+        <div class="card)<h3>Promedio Días</h3><p id="d-promedio">0d</p></div>
     </div>
 
     <div class="dashboard-grid">
@@ -134,13 +119,9 @@
         let dataFull = [];
         let chart1, chart2;
         const filtrosIds = {
-            'f-regional': 'REGIONAL', 
-            'f-depto': 'DEPARTAMENTO', 
-            'f-aliado': 'ALIADO', 
-            'f-topologia': 'TOPOLOGIA',
-            'f-tipo-operacion': 'PROYECTO'
+            'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 
+            'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'
         };
-        
         const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
 
         async function init() {
@@ -166,19 +147,14 @@
             render(filtrados);
         }
 
-        // SELECCIÓN DE SITIO: ACTUALIZA FILTROS, KPIs Y GRÁFICAS
         function seleccionarSitio(id) {
             const sitio = dataFull.find(s => s.ID == id);
             if (!sitio) return;
-
-            // Inyectar valores del sitio en los filtros
             document.getElementById('f-regional').value = sitio.REGIONAL;
             document.getElementById('f-depto').value = sitio.DEPARTAMENTO;
             document.getElementById('f-aliado').value = sitio.ALIADO;
             document.getElementById('f-topologia').value = sitio.TOPOLOGIA;
             document.getElementById('f-tipo-operacion').value = sitio.PROYECTO;
-
-            // Sincronizar selectores y renderizar solo este sitio
             actualizarSelectores();
             render([sitio]);
         }
@@ -212,6 +188,7 @@
         }
 
         function render(data) {
+            // Ordenar de mayor a menor horas
             const dataOrdenada = [...data].sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
             let sDisp = 0, tFallas = 0, sMTTR = 0, causas = {}, rankingAliados = {};
             const tbody = document.getElementById('b-tabla');
@@ -224,13 +201,17 @@
                 causas[s.motivo_falla] = (causas[s.motivo_falla] || 0) + 1;
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
-                if(s.disponibilidad < 100) {
+                // CORRECCIÓN LÓGICA: Mostrar si hay ticket activo O si la disponibilidad es menor a 100
+                if(s.tickets > 0 || s.disponibilidad < 100) {
                     const hrs = parseFloat(s.mttr_horas) || 0;
                     const dias = (hrs / 24).toFixed(1);
+                    const labelHrs = hrs === 0 && s.tickets > 0 ? "Pendiente" : hrs.toFixed(1) + "h";
+                    const labelDias = hrs === 0 && s.tickets > 0 ? "Pendiente" : dias + "d";
+
                     tbody.innerHTML += `<tr onclick="seleccionarSitio('${s.ID}')">
                         <td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td>
-                        <td style="text-align: right;">${dias}d</td>
-                        <td style="color:var(--rojo); text-align: right;">${hrs.toFixed(1)}h</td>
+                        <td style="text-align: right;">${labelDias}</td>
+                        <td style="color:var(--rojo); text-align: right;">${labelHrs}</td>
                     </tr>`;
                 }
             });
@@ -250,17 +231,9 @@
         function actualizarGraficas(causas, ranking) {
             if(chart1) chart1.destroy();
             if(chart2) chart2.destroy();
-            chart1 = new Chart(document.getElementById('cFallas'), { 
-                type: 'doughnut', 
-                data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#455A64', '#78909C', '#B0BEC5', '#CFD8DC'], borderWidth: 0 }] }, 
-                options: { maintainAspectRatio: false }
-            });
+            chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#455A64', '#78909C', '#B0BEC5', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
             const etiquetasAliados = Object.keys(ranking);
-            chart2 = new Chart(document.getElementById('cAliados'), { 
-                type: 'bar', 
-                data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] }, 
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
+            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: etiquetasAliados, datasets: [{ data: Object.values(ranking), backgroundColor: etiquetasAliados.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }});
         }
 
         function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
