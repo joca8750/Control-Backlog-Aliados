@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Sincronización Total</title>
+    <title>Backlog Regional</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -24,9 +24,8 @@
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.25rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
-        h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
+        h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
 
-        /* TOOLBAR */
         .toolbar { 
             background: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; 
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
@@ -50,18 +49,15 @@
         .btn-return { background: var(--azul-return); }
         .btn-return:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* KPIs */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; }
         .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
-        /* DASHBOARD GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
         .chart-box { height: 260px; position: relative; width: 100%; cursor: pointer; }
 
-        /* TABLA */
         .table-wrapper { overflow-x: auto; max-height: 400px; border: 1px solid #f0f0f0; border-radius: 4px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 8px 6px; text-align: left; font-size: 0.65rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; font-weight: 700; }
@@ -106,10 +102,10 @@
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Cargando datos...</h2>
+            <h2 id="table-title">Cargando...</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th style="width:25%">ID</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
+                    <thead><tr><th style="width:25%">ID SITIO</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -132,7 +128,7 @@
                 dataFull = await res.json();
                 actualizarSelectores();
                 aplicarCambios(false);
-            } catch (e) { console.error("Error cargando JSON:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function registrarEstado() {
@@ -151,26 +147,34 @@
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
-            // FILTRADO DINÁMICO TOTAL
             let filtrados = dataFull.filter(item => {
-                const cumpleFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
+                // Filtro base de inventario
+                const matchFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
                        (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
-                       (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO) &&
-                       (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
+                       (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO);
 
-                if (!cumpleFiltros) return false;
+                if (!matchFiltros) return false;
 
+                // REGLA DE SINCRONIZACIÓN:
+                // Si el usuario filtró por Causa o por Días, FORZAMOS que solo se cuenten fallas reales (ticket y >= 1 día)
                 const d = item.mttr_horas / 24;
-                // SI HAY UN FILTRO DE LA GRÁFICA DE DÍAS, REDUCIMOS EL UNIVERSO DE DATOS
-                if (currentDayFilter) {
-                    if (currentDayFilter === '>60') return d > 60;
-                    if (currentDayFilter === '45-60') return d > 45 && d <= 60;
-                    if (currentDayFilter === '30-45') return d > 30 && d <= 45;
-                    if (currentDayFilter === '15-30') return d > 15 && d <= 30;
-                    if (currentDayFilter === '5-15') return d > 5 && d <= 15;
-                    if (currentDayFilter === '1-5') return d >= 1 && d <= 5;
+                const esFallaReal = (item.tickets > 0 && d >= 1);
+
+                if (selecciones.motivo_falla !== 'todos' || currentDayFilter !== null) {
+                    if (!esFallaReal) return false; // Descartamos sitios sin ticket o < 1 día
+                    
+                    if (selecciones.motivo_falla !== 'todos' && item.motivo_falla !== selecciones.motivo_falla) return false;
+
+                    if (currentDayFilter) {
+                        if (currentDayFilter === '>60') return d > 60;
+                        if (currentDayFilter === '45-60') return d > 45 && d <= 60;
+                        if (currentDayFilter === '30-45') return d > 30 && d <= 45;
+                        if (currentDayFilter === '15-30') return d > 15 && d <= 30;
+                        if (currentDayFilter === '5-15') return d > 5 && d <= 15;
+                        if (currentDayFilter === '1-5') return d >= 1 && d <= 5;
+                    }
                 }
                 return true;
             });
@@ -228,7 +232,6 @@
             sorted.forEach(s => {
                 sD += s.disponibilidad; 
                 const d = s.mttr_horas / 24;
-                // SINCRONIZACIÓN: SOLO CONTAMOS BACKLOG ACTIVO (TICKET Y >= 1 DÍA)
                 if (s.tickets > 0 && d >= 1) {
                     nF++; sH += s.mttr_horas;
                     mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1;
@@ -241,16 +244,15 @@
                 }
             });
 
-            // EL "TOTAL SITIOS" AHORA ES DINÁMICO SEGÚN LA SELECCIÓN
+            // AHORA EL TOTAL SITIOS Y SITIOS FALLA SON IGUALES CUANDO HAY FILTROS DE GRÁFICA
             document.getElementById('t-sitios').innerText = data.length; 
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = nF; // COINCIDENCIA TOTAL CON GRÁFICA
+            document.getElementById('t-falla').innerText = nF; 
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
-            // LA TABLA SOLO MUESTRA LOS SITIOS DEL BACKLOG (D >= 1)
             const listaFiltrada = sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1);
             listaFiltrada.forEach(s => {
                 const tr = document.createElement('tr');
