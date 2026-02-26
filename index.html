@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard High-Performance - R3</title>
+    <title>Backlog Regionales</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -22,53 +22,60 @@
 
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.5rem; margin: 10px 0; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.6rem; margin: 15px 0; letter-spacing: 1px; }
         h2 { color: var(--rojo); font-size: 1.1rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; }
 
+        /* TOOLBAR */
         .toolbar { 
             background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; 
-            display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
-        .filter-group { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
         label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
-        
-        select { padding: 10px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.9rem; width: 100%; background: #fff; }
+        select { padding: 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 130px; background: #fff; }
 
-        .btn-container { display: flex; gap: 10px; width: 100%; }
-        .btn-excel, .btn-return { flex: 1; padding: 12px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-container { display: flex; gap: 8px; }
+        .btn-excel, .btn-return { padding: 10px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
         .btn-excel { background: var(--rojo); }
         .btn-return { background: var(--azul-return); }
 
-        .resumen-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; }
+        /* KPI CARDS */
+        .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .card { background: white; padding: 12px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.7rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 1.5rem; color: var(--rojo); margin: 5px 0; font-weight: 500 !important; }
+        .card p { font-size: 1.6rem; color: var(--rojo); margin: 5px 0; }
 
+        /* GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
         .chart-container, .tabla-critica { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* Ajuste de altura para que quepan las gráficas */
         .chart-box { height: 320px; position: relative; }
 
-        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; border: 1px solid #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; min-width: 450px; }
-        th { border-bottom: 2px solid var(--rojo); padding: 10px; text-align: left; font-size: 0.7rem; color: #888; position: sticky; top: 0; background: white; }
-        td { padding: 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; }
+        /* TABLE ADJUSTMENTS */
+        .table-wrapper { overflow-x: auto; max-height: 450px; border: 1px solid #f0f0f0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; min-width: 480px; table-layout: fixed; }
+        th { border-bottom: 2px solid var(--rojo); padding: 10px 5px; text-align: left; font-size: 0.75rem; color: #888; position: sticky; top: 0; background: white; z-index: 5; }
+        td { padding: 10px 5px; border-bottom: 1px solid #f5f5f5; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Column widths */
+        .col-id { width: 15%; }
+        .col-aliado { width: 35%; }
+        .col-dias { width: 25%; text-align: right; }
+        .col-hrs { width: 25%; text-align: right; }
 
         @media (min-width: 1024px) {
-            body { padding: 10px 20px; height: 100vh; overflow: hidden; }
-            .toolbar { flex-direction: row; justify-content: center; }
-            .filter-group { width: auto; }
-            select { width: 130px; }
+            body { padding: 15px 30px; height: 100vh; overflow: hidden; }
+            h1 { font-size: 2.2rem; }
             .resumen-container { grid-template-columns: repeat(4, 1fr); }
             .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; height: calc(100vh - 280px); }
+            .card p { font-size: 2.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Backlog R3 - Performance Mode</h1>
+    <h1>Backlog Regionales</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="aplicarCambios()"></select></div>
@@ -96,7 +103,14 @@
             <h2 id="titulo-lista">Top 100 Sitios Críticos</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th>ID</th><th>Aliado</th><th style="text-align: right;">Dias</th><th style="text-align: right;">Hrs</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th class="col-aliado">Aliado</th>
+                            <th class="col-dias" style="text-align:right;">Dias</th>
+                            <th class="col-hrs" style="text-align:right;">Hrs</th>
+                        </tr>
+                    </thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -107,7 +121,8 @@
         let dataFull = [];
         let chart1, chart2;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
-        
+        const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
+
         async function init() {
             try {
                 const res = await fetch('data_ben.json');
@@ -119,7 +134,7 @@
 
         function aplicarCambios() {
             const selecciones = {};
-            for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value; }
+            for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
@@ -128,16 +143,15 @@
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
                        (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO);
             });
-
             actualizarSelectores();
             render(filtrados);
         }
 
         function seleccionarSitio(id) {
-            const sitio = dataFull.find(s => s.ID == id);
-            if (!sitio) return;
-            for (let id in filtrosIds) { document.getElementById(id).value = sitio[filtrosIds[id]]; }
-            render([sitio]);
+            const s = dataFull.find(item => item.ID == id);
+            if (!s) return;
+            for (let id in filtrosIds) { document.getElementById(id).value = s[filtrosIds[id]]; }
+            render([s]);
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -167,21 +181,16 @@
                 const valorPrevio = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
                 unicos.forEach(v => selectEl.add(new Option(v, v)));
-                selectEl.value = unicos.includes(valorPrevio) ? valorPrevio : 'todos';
+                if (unicos.includes(valorPrevio)) selectEl.value = valorPrevio;
             }
         }
 
         function render(data) {
-            const totalRecords = data.length;
-            // Ordenamos una sola vez
-            const sorted = data.sort((a, b) => (b.mttr_horas || 0) - (a.mttr_horas || 0));
-            
+            const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
             let sumDisp = 0, sumHrs = 0, nFalla = 0;
             let mCausas = {}, mAliados = {};
 
-            // Procesamos la data de forma eficiente (un solo ciclo para todo)
-            for (let i = 0; i < totalRecords; i++) {
-                const s = sorted[i];
+            sorted.forEach(s => {
                 sumDisp += s.disponibilidad;
                 sumHrs += s.mttr_horas;
                 if (s.tickets > 0) {
@@ -189,27 +198,28 @@
                     mCausas[s.motivo_falla] = (mCausas[s.motivo_falla] || 0) + 1;
                     mAliados[s.ALIADO] = (mAliados[s.ALIADO] || 0) + 1;
                 }
-            }
+            });
 
-            // Actualizamos KPIs
-            const totalParaPromedio = totalRecords || 1;
-            document.getElementById('d-global').innerText = (sumDisp / totalParaPromedio).toFixed(1) + "%";
+            const total = data.length || 1;
+            document.getElementById('d-global').innerText = (sumDisp / total).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = nFalla;
-            document.getElementById('m-promedio').innerText = (sumHrs / totalParaPromedio).toFixed(1) + "h";
-            document.getElementById('d-promedio').innerText = (sumHrs / totalParaPromedio / 24).toFixed(1) + "d";
+            document.getElementById('m-promedio').innerText = (sumHrs / total).toFixed(1) + "h";
+            document.getElementById('d-promedio').innerText = (sumHrs / total / 24).toFixed(1) + "d";
 
-            // Paginación Virtual: Solo pintamos los primeros 100 en la tabla para ganar velocidad
-            const limit = 100;
             const tbody = document.getElementById('b-tabla');
             let html = "";
-            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, limit);
+            const aMostrar = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 100);
             
             aMostrar.forEach(s => {
                 const labelHrs = s.mttr_horas === 0 && s.tickets > 0 ? "Pend." : s.mttr_horas.toFixed(1) + "h";
-                html += `<tr onclick="seleccionarSitio('${s.ID}')"><td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;">${labelHrs}</td></tr>`;
+                html += `<tr onclick="seleccionarSitio('${s.ID}')">
+                    <td class="col-id">${s.ID}</td>
+                    <td class="col-aliado">${s.ALIADO}</td>
+                    <td class="col-dias" style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td>
+                    <td class="col-hrs" style="color:var(--rojo);text-align:right;">${labelHrs}</td>
+                </tr>`;
             });
             tbody.innerHTML = html;
-            document.getElementById('titulo-lista').innerText = totalRecords > limit ? `Top ${limit} Sitios Críticos` : "Lista de Backlog";
 
             actualizarGraficas(mCausas, mAliados);
         }
@@ -217,43 +227,39 @@
         function actualizarGraficas(causas, ranking) {
             if(chart1) chart1.destroy();
             if(chart2) chart2.destroy();
-
             const isMobile = window.innerWidth < 1024;
 
-            // GRAFICA DISTRIBUCIÓN - Ajuste para ver datos completos
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(causas),
-                    datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2'], borderWidth: 0 }]
+                    datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }]
                 },
                 options: {
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: isMobile ? 'bottom' : 'right', // Se mueve a la derecha en PC para no tapar
-                            labels: { boxWidth: 12, font: { size: 10 } }
-                        }
-                    }
+                    plugins: { legend: { position: isMobile ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } } }
                 }
             });
 
-            const aliados = Object.keys(ranking);
+            const etiquetas = Object.keys(ranking);
             chart2 = new Chart(document.getElementById('cAliados'), {
                 type: 'bar',
                 data: {
-                    labels: aliados,
-                    datasets: [{ data: Object.values(ranking), backgroundColor: aliados.map((_, i) => `hsl(${i * 45}, 70%, 50%)`) }]
+                    labels: etiquetas,
+                    datasets: [{ data: Object.values(ranking), backgroundColor: etiquetas.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }]
                 },
                 options: {
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 9 } } } }
+                    scales: { 
+                        y: { beginAtZero: true },
+                        x: { ticks: { maxRotation: 45, minRotation: 45, font: { size: 9 } } } // Rotación para legibilidad
+                    }
                 }
             });
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Regionales.xlsx"); }
         init();
     </script>
 </body>
