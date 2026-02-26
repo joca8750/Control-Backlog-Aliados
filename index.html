@@ -12,11 +12,13 @@
     <style>
         :root { 
             --rojo: #D32F2F; 
+            --rojo-oscuro: #B71C1C;
             --gris-fondo: #F4F7F6; 
             --texto: #212121; 
             --borde: #E0E0E0;
         }
 
+        /* RESET GLOBAL */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
@@ -31,9 +33,10 @@
             height: 100vh; overflow: hidden; 
         }
 
-        h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 10px 0; }
+        h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 15px 0; }
         h2 { color: var(--rojo); font-size: 1.2rem; margin: 0 0 12px 0; text-transform: uppercase; text-align: center; }
 
+        /* TOOLBAR Y BOTONES */
         .toolbar { 
             background: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
             display: flex; flex-wrap: wrap; gap: 15px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
@@ -43,14 +46,31 @@
         label { font-size: 0.85rem; color: #666; text-transform: uppercase; }
         select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 150px; background: #fff; outline: none; }
 
+        .btn-excel { background: var(--rojo); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; transition: background 0.3s; }
+        .btn-excel:hover { background: var(--rojo-oscuro); }
+
+        /* BOTÓN RETURN DINÁMICO */
+        .btn-return { 
+            background: #2c3e50; color: white; border: none; padding: 10px 22px; border-radius: 4px; 
+            cursor: pointer; font-size: 0.85rem; text-transform: uppercase; margin-left: auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .btn-return:hover { background: #34495e; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn-return:active { transform: translateY(0); }
+
+        /* TARJETAS KPI (Tamaños Unificados) */
         .resumen-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
         .card { background: white; padding: 15px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 2.2rem; color: var(--rojo); margin: 5px 0; }
+        .card p { font-size: 2.2rem; color: var(--rojo); margin: 5px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* DASHBOARD GRID */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 15px; height: calc(100vh - 280px); }
         .chart-container, .tabla-critica { background: white; padding: 18px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; }
 
+        /* TABLA CON NUEVA COLUMNA */
         .table-wrapper { overflow-y: auto; flex-grow: 1; border: 1px solid #f0f0f0; }
         table { width: 100%; border-collapse: collapse; }
         th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
@@ -59,8 +79,11 @@
         tr[onclick] { cursor: pointer; transition: background 0.2s; }
         tr[onclick]:hover { background: #FEEBEB; }
 
-        .btn-excel { background: var(--rojo); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; }
-        .btn-reset { background: #555; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; margin-left: auto; }
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
+            body { overflow-y: auto; height: auto; }
+            .resumen-container { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -73,24 +96,32 @@
         <div class="filter-group"><label>Aliado</label><select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
         <div class="filter-group"><label>Topología</label><select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
         <button class="btn-excel" onclick="exportarExcel()">Excel</button>
-        <button class="btn-reset" onclick="resetearFiltros()">Restablecer Todo</button>
+        <button class="btn-return" onclick="resetearFiltros()">↺ Return</button>
     </div>
 
     <div class="resumen-container">
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
         <div class="card"><h3>Promedio Horas</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Sede Crítica</h3><p id="s-critico" style="font-size: 0.85rem;">--</p></div>
+        <div class="card"><h3>Sede Crítica</h3><p id="s-critico">--</p></div>
     </div>
 
     <div class="dashboard-grid">
         <div class="chart-container"><h2>Distribución</h2><div style="flex-grow:1;"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Ranking Aliado</h2><div style="flex-grow:1;"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
-            <h2>Lista de Backlog (Seleccione un sitio)</h2>
+            <h2>Lista de Backlog</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th>ID</th><th>Aliado</th><th>Estado</th><th style="text-align: right;">Hrs</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Aliado</th>
+                            <th>Estado</th>
+                            <th style="text-align: right;">Dias</th>
+                            <th style="text-align: right;">Hrs</th>
+                        </tr>
+                    </thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -126,18 +157,13 @@
             render(filtrados);
         }
 
-        // FUNCIÓN CLAVE: Al hacer clic en un sitio, forzamos los filtros a ese sitio
         function seleccionarSitio(id) {
             const sitio = dataFull.find(s => s.ID == id);
             if (!sitio) return;
-
-            // Actualizamos los valores de los selectores para que coincidan con el sitio
             document.getElementById('f-regional').value = sitio.REGIONAL;
             document.getElementById('f-depto').value = sitio.DEPARTAMENTO;
             document.getElementById('f-aliado').value = sitio.ALIADO;
             document.getElementById('f-topologia').value = sitio.TOPOLOGIA;
-
-            // Ejecutamos el renderizado solo para ese registro
             render([sitio]);
         }
 
@@ -154,7 +180,6 @@
             for (let idTarget in filtrosIds) {
                 const campoTarget = filtrosIds[idTarget];
                 const selectEl = document.getElementById(idTarget);
-                
                 const dataParaOpciones = dataFull.filter(item => {
                     for (let idSource in filtrosIds) {
                         if (idSource === idTarget) continue;
@@ -163,7 +188,6 @@
                     }
                     return true;
                 });
-
                 const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
                 const guardado = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
@@ -186,9 +210,15 @@
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
                 if(s.disponibilidad < 100) {
+                    const hrs = parseFloat(s.mttr_horas) || 0;
+                    const dias = (hrs / 24).toFixed(1);
+                    
                     tbody.innerHTML += `<tr onclick="seleccionarSitio('${s.ID}')">
-                        <td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td>
-                        <td style="color:var(--rojo); text-align: right;">${parseFloat(s.mttr_horas).toFixed(1)}h</td>
+                        <td>${s.ID}</td>
+                        <td>${s.ALIADO}</td>
+                        <td>${s.motivo_falla}</td>
+                        <td style="text-align: right;">${dias}d</td>
+                        <td style="color:var(--rojo); text-align: right;">${hrs.toFixed(1)}h</td>
                     </tr>`;
                 }
             });
@@ -196,6 +226,7 @@
             document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / data.length : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
             document.getElementById('m-promedio').innerText = (data.length > 0 ? sMTTR / data.length : 0).toFixed(1) + "h";
+            
             const critico = data.length > 0 ? data.reduce((p, c) => (parseFloat(p.mttr_horas) > parseFloat(c.mttr_horas) ? p : c)) : null;
             document.getElementById('s-critico').innerText = critico ? critico['ID'] : "--";
 
@@ -209,7 +240,7 @@
             chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: Object.keys(ranking), datasets: [{ label: 'Fallas', data: Object.values(ranking), backgroundColor: '#D32F2F' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }}}});
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
         init();
     </script>
 </body>
