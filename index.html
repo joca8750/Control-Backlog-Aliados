@@ -24,11 +24,10 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        /* TÍTULO ACTUALIZADO Y REDUCIDO */
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.25rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.9rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
 
-        /* TOOLBAR */
+        /* TOOLBAR COMPACTA */
         .toolbar { 
             background: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; 
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
@@ -187,7 +186,7 @@
                     if (currentDayFilter === '30-45') return d >= 30 && d < 45;
                     if (currentDayFilter === '15-30') return d >= 15 && d < 30;
                     if (currentDayFilter === '5-15') return d >= 5 && d < 15;
-                    if (currentDayFilter === '<5') return d < 5;
+                    if (currentDayFilter === '1-5') return d >= 1 && d < 5;
                 }
                 return true;
             });
@@ -241,7 +240,7 @@
         function render(data) {
             const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
             let sD = 0, sH = 0, nF = 0, mC = {};
-            let r_dias = { '>60': 0, '45-60': 0, '30-45': 0, '15-30': 0, '5-15': 0, '<5': 0 };
+            let r_dias = { '>60': 0, '45-60': 0, '30-45': 0, '15-30': 0, '5-15': 0, '1-5': 0 };
 
             sorted.forEach(s => {
                 sD += s.disponibilidad; sH += s.mttr_horas;
@@ -253,7 +252,7 @@
                     else if (d >= 30) r_dias['30-45']++;
                     else if (d >= 15) r_dias['15-30']++;
                     else if (d >= 5) r_dias['5-15']++;
-                    else r_dias['<5']++;
+                    else if (d >= 1) r_dias['1-5']++;
                 }
             });
 
@@ -296,21 +295,29 @@
                 }
             });
 
-            const clavesRango = ['>60', '45-60', '30-45', '15-30', '5-15', '<5'];
+            const clavesRango = ['>60', '45-60', '30-45', '15-30', '5-15', '1-5'];
             
             chartAfectacion = new Chart(document.getElementById('cAfectacionDias'), {
                 type: 'bar', 
                 data: { 
-                    labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '<5 Días'], 
+                    labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
                     datasets: [{ 
-                        data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['<5']], 
-                        backgroundColor: ['#B71C1C', '#D32F2F', '#E64A19', '#FBC02D', '#B0BEC5', '#ECEFF1'],
+                        data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
+                        backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'],
                         borderRadius: 5
                     }] 
                 },
                 options: { 
-                    maintainAspectRatio: false, indexAxis: 'y', 
-                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false, 
+                    indexAxis: 'y', 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` Sitios: ${context.raw}`
+                            }
+                        }
+                    },
                     scales: { 
                         y: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } },
                         x: { beginAtZero: true, grid: { color: '#eee' } } 
