@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Sincronizado</title>
+    <title>Backlog Regional - Enfoque Individual</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -38,7 +38,7 @@
         select { 
             padding: 5px 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.75rem; background: #fff; width: 100%; height: 32px; cursor: pointer;
             transition: all 0.2s ease; outline: none; appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
             background-repeat: no-repeat; background-position: right 8px center;
         }
         select:hover { border-color: var(--rojo); background-color: var(--hover-selector); }
@@ -47,6 +47,7 @@
         .btn { padding: 8px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.2s; }
         .btn-excel { background: #2e7d32; }
         .btn-return { background: var(--azul-return); }
+        .btn-return:disabled { opacity: 0.3; cursor: not-allowed; }
 
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; }
         .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -63,6 +64,7 @@
         td { padding: 8px 6px; border-bottom: 1px solid #f5f5f5; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 4px solid var(--rojo); font-weight: 700; }
+        tr:hover td { background-color: #fafafa; cursor: pointer; }
 
         @media (min-width: 1024px) {
             body { padding: 10px 20px; height: 100vh; overflow: hidden; }
@@ -112,6 +114,7 @@
 
     <script>
         let dataFull = [];
+        let dataParaRenderizar = []; 
         let chart1, chartAfectacion;
         let selectedId = null;
         let historial = [];
@@ -136,18 +139,36 @@
             document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() { currentDayFilter = null; registrarEstado(); aplicarCambios(false); }
+        function registrarYFiltrar() { 
+            currentDayFilter = null; 
+            selectedId = null; 
+            registrarEstado(); 
+            aplicarCambios(false); 
+        }
 
-        function filtrarPorRangoDias(rango) { registrarEstado(); currentDayFilter = rango; aplicarCambios(false); }
+        function filtrarPorRangoDias(rango) { 
+            registrarEstado(); 
+            currentDayFilter = rango; 
+            aplicarCambios(false); 
+        }
 
         function aplicarCambios(conRegistro = true) {
             if (conRegistro) registrarEstado();
+            
+            // Si hay un seleccionado, ignoramos filtros y solo mostramos ESE sitio
+            if (selectedId) {
+                const s = dataFull.find(item => item.ID == selectedId);
+                dataParaRenderizar = [s];
+                actualizarSelectoresIndiv(s);
+                render(dataParaRenderizar, true);
+                return;
+            }
+
             const selecciones = {};
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
-            let filtrados = dataFull.filter(item => {
+            dataParaRenderizar = dataFull.filter(item => {
                 const cumpleCausa = (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
-                // SOLO CONSIDERAMOS FALLA SI TIENE TICKET Y TIENE AL MENOS 1 DIA
                 const esFallaReal = (item.tickets > 0 && (item.mttr_horas / 24) >= 1);
                 const activoSiCausa = (selecciones.motivo_falla === 'todos') ? true : esFallaReal;
                 
@@ -173,16 +194,14 @@
             });
 
             actualizarSelectores();
-            render(filtrados);
+            render(dataParaRenderizar, false);
         }
 
         function seleccionarSitio(id) {
             registrarEstado();
-            const s = dataFull.find(item => item.ID == id);
-            if (!s) return;
             selectedId = id;
-            for (let idInput in filtrosIds) { document.getElementById(idInput).value = s[filtrosIds[idInput]]; }
             aplicarCambios(false);
+            if(window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function pasoAtras() {
@@ -217,7 +236,14 @@
             }
         }
 
-        function render(data) {
+        function actualizarSelectoresIndiv(s) {
+            for (let idInput in filtrosIds) { 
+                const selectEl = document.getElementById(idInput);
+                selectEl.innerHTML = `<option value="${s[filtrosIds[idInput]]}">${s[filtrosIds[idInput]]}</option>`;
+            }
+        }
+
+        function render(data, esIndividual) {
             const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
             let sD = 0, sH = 0, nF = 0, mC = {};
             let r_dias = { '>60': 0, '45-60': 0, '30-45': 0, '15-30': 0, '5-15': 0, '1-5': 0 };
@@ -225,13 +251,10 @@
             sorted.forEach(s => {
                 sD += s.disponibilidad; 
                 const d = s.mttr_horas / 24;
-                
-                // CONDICION DE SINCRONIZACION: SOLO >= 1 DIA
                 if (s.tickets > 0 && d >= 1) {
                     nF++; 
                     sH += s.mttr_horas;
                     mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1;
-                    
                     if (d > 60) r_dias['>60']++;
                     else if (d > 45) r_dias['45-60']++;
                     else if (d > 30) r_dias['30-45']++;
@@ -243,13 +266,13 @@
 
             document.getElementById('t-sitios').innerText = data.length;
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = nF; // ESTE NUMERO AHORA SERA 94
+            document.getElementById('t-falla').innerText = nF;
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
-            sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1).slice(0, 500).forEach(s => {
+            sorted.forEach(s => {
                 const tr = document.createElement('tr');
                 if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => seleccionarSitio(s.ID);
@@ -257,6 +280,7 @@
                 tbody.appendChild(tr);
             });
             
+            document.getElementById('table-title').innerText = esIndividual ? `Viendo Sitio: ${selectedId}` : "Backlog Activo (≥ 1 Día)";
             actualizarGraficas(mC, r_dias);
         }
 
@@ -267,9 +291,7 @@
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut', 
                 data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } },
-                onClick: (e, item) => { registrarEstado(); document.getElementById('f-causa').value = item.text; aplicarCambios(false); }
-                }}}
+                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } }}}
             });
 
             const clavesRango = ['>60', '45-60', '30-45', '15-30', '5-15', '1-5'];
