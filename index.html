@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Buscador Sincronizado</title>
+    <title>Backlog Regional - Dashboard Final</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -27,6 +27,7 @@
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.2rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
 
+        /* TOOLBAR */
         .toolbar { 
             background: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; 
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
@@ -51,15 +52,18 @@
         .btn-return { background: var(--azul-return); }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* KPIs */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; }
         .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .card h3 { color: #777; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
+        /* DASHBOARD GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
         .chart-box { height: 260px; position: relative; }
 
+        /* TABLA */
         .table-wrapper { overflow-x: auto; max-height: 400px; border: 1px solid #f0f0f0; border-radius: 4px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 8px 6px; text-align: left; font-size: 0.65rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; font-weight: 700; }
@@ -68,11 +72,20 @@
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 4px solid var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #fafafa; cursor: pointer; }
 
-        /* TOOLTIP STOPPER */
+        /* TOOLTIP STOPPER PROFESIONAL */
         #tooltip-stopper {
-            position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 8px;
-            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 350px;
-            pointer-events: none; font-size: 0.85rem; color: #333;
+            position: fixed; 
+            display: none; 
+            background: white; 
+            border: 2px solid var(--rojo); 
+            border-radius: 8px;
+            padding: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            z-index: 10000; 
+            max-width: 350px;
+            pointer-events: none; 
+            font-size: 0.85rem; 
+            color: #333;
         }
         #tooltip-stopper b { color: var(--rojo); display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; }
 
@@ -146,32 +159,40 @@
             } catch (e) { console.error("Error cargando JSON:", e); }
         }
 
+        // --- FUNCIÓN TOOLTIP ACTUALIZADA PARA MOSTRAR STOPPER REAL ---
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
-            const stopper = item.STOPPER || item.stopper || "No hay información registrada";
-            tt.innerHTML = `<b>DETALLE STOPPER - ID: ${item.ID}</b>${stopper}`;
+            // Captura el Stopper directamente del JSON para cada sitio
+            const textoStopper = item.STOPPER || item.stopper || "Información en proceso...";
+            
+            tt.innerHTML = `
+                <div style="border-bottom: 1px solid #eee; margin-bottom: 8px; padding-bottom: 4px;">
+                    <b style="color:var(--rojo); font-size: 0.7rem;">STOPPER DETECTADO - ID: ${item.ID}</b>
+                </div>
+                <div style="font-size: 0.9rem; font-weight: 500; color: #333; line-height: 1.3;">
+                    ${textoStopper}
+                </div>
+                <div style="margin-top: 8px; font-size: 0.65rem; color: #888;">
+                    <b>Municipio:</b> ${item.MUNICIPIO || 'N/A'} | <b>Aliado:</b> ${item.ALIADO}
+                </div>
+            `;
+            
             tt.style.display = 'block';
             let x = e.clientX + 20; let y = e.clientY + 20;
             if (x + 350 > window.innerWidth) x = e.clientX - 360;
-            if (y + 150 > window.innerHeight) y = e.clientY - 150;
+            if (y + 180 > window.innerHeight) y = e.clientY - 180;
             tt.style.left = x + 'px'; tt.style.top = y + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
-        // --- BÚSQUEDA POR ID CON MEMORIA DE RETORNO ---
         function buscarPorID() {
             const idBusca = prompt("Ingrese el ID del sitio a buscar:");
             if (!idBusca) return;
-            
             const sitioEncontrado = dataFull.find(i => String(i.ID) === String(idBusca).trim());
             if (sitioEncontrado) {
-                // PRIMERO: Registrar el estado actual antes de saltar al ID
                 registrarEstado(); 
-                // SEGUNDO: Seleccionar el sitio
                 seleccionarSitio(sitioEncontrado.ID);
-            } else {
-                alert("El ID ingresado no se encuentra en la base de datos.");
-            }
+            } else { alert("ID no encontrado."); }
         }
 
         function registrarEstado() {
@@ -218,32 +239,26 @@
         function seleccionarSitio(id) {
             selectedId = id;
             const s = dataFull.find(i => i.ID == id);
-            // Sincronizar visualmente los combos de arriba con los datos del sitio buscado
             if (s) { 
                 for (let key in filtrosIds) { 
                     const selectEl = document.getElementById(key);
-                    // Asegurar que el valor existe en el combo antes de asignarlo
                     if (![...selectEl.options].some(o => o.value === s[filtrosIds[key]])) {
                         selectEl.add(new Option(s[filtrosIds[key]], s[filtrosIds[key]]));
                     }
                     selectEl.value = s[filtrosIds[key]]; 
                 } 
             }
-            aplicarCambios(false); // No registramos estado aquí porque ya se hizo en buscarPorID o al hacer clic
+            aplicarCambios(false);
             if(window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function pasoAtras() {
             if (historial.length === 0) return;
             const ultimo = JSON.parse(historial.pop());
-            // Restaurar filtros
             for (let id in ultimo.filtros) { document.getElementById(id).value = ultimo.filtros[id]; }
             selectedId = ultimo.selectedId;
             currentDayFilter = ultimo.currentDayFilter;
-            
-            actualizarSelectores(); 
-            aplicarCambios(false);
-            
+            actualizarSelectores(); aplicarCambios(false);
             if (historial.length === 0) document.getElementById('btn-return').disabled = true;
         }
 
@@ -300,7 +315,6 @@
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;font-weight:bold;">${s.mttr_horas.toFixed(1)}h</td>`;
                 tbody.appendChild(tr);
             });
-            
             document.getElementById('table-title').innerText = selectedId ? `Detalle Sitio: ${selectedId}` : `Backlog Activo (${nF} sitios)`;
             actualizarGraficas(mC, r_dias);
         }
@@ -308,7 +322,6 @@
         function actualizarGraficas(causas, r_dias) {
             if(chart1) chart1.destroy(); if(chartAfectacion) chartAfectacion.destroy();
             const isMob = window.innerWidth < 1024;
-            
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut', 
                 data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
@@ -317,30 +330,24 @@
                 }},
                 onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}}
             });
-
             const claves = ['>60', '45-60', '30-45', '15-30', '5-15', '1-5'];
             chartAfectacion = new Chart(document.getElementById('cAfectacionDias'), {
                 type: 'bar', 
-                data: { 
-                    labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
-                    datasets: [{ data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
-                    backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] 
-                },
-                options: { 
-                    maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
-                    scales: { y: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }, x: { beginAtZero: true, grid: { color: '#eee' } } },
-                    onClick: (e, el) => {
-                        if (el.length > 0) { filtrarPorRangoDias(claves[el[0].index]); }
-                        else {
-                            const yAxis = chartAfectacion.scales.y;
-                            const index = yAxis.getValueForPixel(e.y);
-                            if (index >= 0 && index < claves.length) { filtrarPorRangoDias(claves[index]); }
-                        }
+                data: { labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
+                datasets: [{ data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
+                backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] },
+                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+                scales: { y: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }, x: { beginAtZero: true, grid: { color: '#eee' } } },
+                onClick: (e, el) => {
+                    if (el.length > 0) { filtrarPorRangoDias(claves[el[0].index]); }
+                    else {
+                        const yAxis = chartAfectacion.scales.y;
+                        const index = yAxis.getValueForPixel(e.y);
+                        if (index >= 0 && index < claves.length) { filtrarPorRangoDias(claves[index]); }
                     }
-                }
+                }}
             });
         }
-
         function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Backlog_Regional.xlsx"); }
         init();
     </script>
