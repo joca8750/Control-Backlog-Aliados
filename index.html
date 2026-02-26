@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regionales - Vista Compacta</title>
+    <title>Backlog Regionales - Fixed View</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -18,73 +18,80 @@
             --azul-return: #2c3e50;
         }
 
-        * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; font-weight: 400 !important; }
-        body { background: var(--gris-fondo); margin: 0; padding: 5px 10px; color: var(--texto); overflow-x: hidden; }
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
+        
+        /* Ajuste base para evitar cortes */
+        html, body { height: 100%; margin: 0; padding: 0; background: var(--gris-fondo); }
+        
+        body { display: flex; flex-direction: column; padding: 10px; overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.2rem; margin: 8px 0; letter-spacing: 1px; }
-        h2 { color: var(--rojo); font-size: 0.9rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.2rem; margin: 5px 0; }
 
-        /* TOOLBAR COMPACTA */
+        /* TOOLBAR */
         .toolbar { 
-            background: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; 
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
+        .filter-group { display: flex; flex-direction: column; flex-grow: 1; min-width: 100px; }
+        label { font-size: 0.6rem; color: #666; text-transform: uppercase; margin-bottom: 2px; }
+        select { padding: 5px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.75rem; height: 30px; }
 
-        .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 100px; }
-        label { font-size: 0.6rem; color: #666; text-transform: uppercase; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.75rem; background: #fff; width: 100%; height: 32px; }
-
-        .btn-container { display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 4px; }
-        .btn { padding: 8px 12px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500 !important; }
+        .btn-container { display: flex; gap: 5px; margin-top: 5px; width: 100%; justify-content: center; }
+        .btn { padding: 8px 15px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.7rem; cursor: pointer; font-weight: 500; }
         .btn-excel { background: var(--rojo); }
         .btn-return { background: var(--azul-return); }
+        .btn:disabled { opacity: 0.3; }
 
-        /* TARJETAS KPI REDUCIDAS */
+        /* KPI CARDS */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px; }
-        .card { background: white; padding: 8px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 8px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; }
         .card h3 { color: #777; font-size: 0.6rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 1.2rem; color: var(--rojo); margin: 2px 0; font-weight: 500 !important; }
+        .card p { font-size: 1.3rem; color: var(--rojo); margin: 2px 0; font-weight: 500; }
 
-        /* GRID RESPONSIVE AJUSTADO */
-        .dashboard-grid { display: flex; flex-direction: column; gap: 10px; }
-        .chart-container, .tabla-critica { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
-        /* GRÁFICAS MÁS PEQUEÑAS */
-        .chart-box { height: 260px; position: relative; width: 100%; cursor: pointer; }
+        /* DASHBOARD GRID */
+        .dashboard-grid { 
+            display: flex; flex-direction: column; gap: 10px; flex-grow: 1; 
+        }
 
-        /* TABLA CON SCROLL TOTALMENTE INDEPENDIENTE */
+        /* CONTENEDORES DE GRÁFICAS (Forzamos altura) */
+        .chart-container { 
+            background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 250px; /* Asegura que no desaparezcan */
+        }
+        .chart-box { height: 220px; width: 100%; position: relative; }
+
+        /* TABLA CON SCROLL REAL */
+        .tabla-critica { 
+            background: white; padding: 10px; border-radius: 8px; 
+            display: flex; flex-direction: column; min-height: 300px;
+        }
         .table-wrapper { 
-            overflow-x: auto; 
-            max-height: 380px; 
-            border: 1px solid #f0f0f0; 
-            border-radius: 4px; 
-            overflow-y: auto; 
-            scrollbar-width: thin; /* Para Firefox */
-            scrollbar-color: var(--rojo) transparent;
+            flex-grow: 1;
+            overflow-y: auto; /* Scroll vertical */
+            overflow-x: auto; /* Scroll horizontal para móvil */
+            border: 1px solid #eee;
+            margin-top: 5px;
         }
         
-        /* Estilo del scroll para Chrome/Safari */
-        .table-wrapper::-webkit-scrollbar { width: 6px; height: 6px; }
-        .table-wrapper::-webkit-scrollbar-thumb { background: var(--rojo); border-radius: 10px; }
-
         table { width: 100%; border-collapse: collapse; min-width: 400px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 8px 5px; text-align: left; font-size: 0.65rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
-        td { padding: 9px 5px; border-bottom: 1px solid #f5f5f5; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        th { border-bottom: 2px solid var(--rojo); padding: 8px; text-align: left; font-size: 0.7rem; position: sticky; top: 0; background: white; z-index: 10; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f5f5f5; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 3px solid var(--rojo); }
+        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 500; border-left: 3px solid var(--rojo); }
 
-        /* PC VIEWPORT */
+        /* RESPONSIVO PARA PC */
         @media (min-width: 1024px) {
-            body { padding: 10px 20px; height: 100vh; overflow: hidden; }
-            h1 { font-size: 1.8rem; margin: 10px 0; }
-            .toolbar { flex-wrap: nowrap; padding: 10px 20px; }
+            body { height: 100vh; overflow: hidden; padding: 10px 20px; }
+            .toolbar { flex-wrap: nowrap; }
             .btn-container { width: auto; margin-top: 0; }
-            .resumen-container { grid-template-columns: repeat(4, 1fr); margin-bottom: 10px; }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; height: calc(100vh - 230px); gap: 15px; }
-            .card p { font-size: 1.8rem; }
-            .chart-box { height: 100%; min-height: 280px; }
-            .table-wrapper { max-height: calc(100% - 35px); }
+            .resumen-container { grid-template-columns: repeat(4, 1fr); }
+            .dashboard-grid { 
+                display: grid; grid-template-columns: 1fr 1fr 1.5fr; 
+                height: calc(100vh - 220px); 
+            }
+            .chart-container { min-height: auto; height: 100%; }
+            .chart-box { height: calc(100% - 30px); }
+            .tabla-critica { height: 100%; min-height: auto; }
         }
     </style>
 </head>
@@ -101,7 +108,7 @@
         <div class="filter-group"><label>Causa</label><select id="f-causa" onchange="registrarYFiltrar()"></select></div>
         <div class="btn-container">
             <button class="btn btn-excel" onclick="exportarExcel()">Excel</button>
-            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Return</button>
+            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>Return</button>
         </div>
     </div>
 
@@ -113,13 +120,26 @@
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Ranking Aliado</h2><div class="chart-box"><canvas id="cAliados"></canvas></div></div>
+        <div class="chart-container">
+            <h2 id="tit-dist">Distribución</h2>
+            <div class="chart-box"><canvas id="cFallas"></canvas></div>
+        </div>
+        <div class="chart-container">
+            <h2>Ranking Aliado</h2>
+            <div class="chart-box"><canvas id="cAliados"></canvas></div>
+        </div>
         <div class="tabla-critica">
-            <h2 id="titulo-lista">Listado</h2>
+            <h2 id="titulo-lista">Listado de Sitios</h2>
             <div class="table-wrapper" id="scroll-container">
                 <table id="tSitios">
-                    <thead><tr><th style="width:20%">ID</th><th style="width:35%">Aliado</th><th style="text-align:right">Dias</th><th style="text-align:right">Hrs</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="width:25%">ID</th>
+                            <th style="width:35%">Aliado</th>
+                            <th style="width:20%; text-align:right">Dias</th>
+                            <th style="width:20%; text-align:right">Hrs</th>
+                        </tr>
+                    </thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -128,12 +148,13 @@
 
     <script>
         let dataFull = [];
-        let dataParaTabla = []; 
+        let dataParaTabla = [];
         let chart1, chart2;
         let selectedId = null;
         let historial = [];
         let indexActual = 0;
-        const pasoCarga = 100;
+        const pasoCarga = 50; // Cargas más pequeñas para mayor fluidez
+
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO', 'f-causa': 'motivo_falla'};
         const coloresPaleta = ['#D32F2F', '#1976D2', '#388E3C', '#FBC02D', '#7B1FA2', '#E64A19', '#0097A7', '#5D4037', '#689F38', '#455A64'];
 
@@ -143,10 +164,14 @@
                 dataFull = await res.json();
                 actualizarSelectores();
                 aplicarCambios(false);
-                document.getElementById('scroll-container').addEventListener('scroll', function(e) {
-                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) cargarMasFilas();
+
+                // Listener de scroll para cargar más datos
+                document.getElementById('scroll-container').addEventListener('scroll', function() {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 20) {
+                        cargarMasFilas();
+                    }
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Error cargando JSON:", e); }
         }
 
         function registrarEstado() {
@@ -163,8 +188,8 @@
             const selecciones = {};
             let hayFiltros = false;
             for (let id in filtrosIds) { 
-                const val = document.getElementById(id).value;
-                selecciones[filtrosIds[id]] = val || 'todos'; 
+                const val = document.getElementById(id).value || 'todos';
+                selecciones[filtrosIds[id]] = val; 
                 if (val !== 'todos') hayFiltros = true;
             }
             
@@ -179,8 +204,10 @@
             
             actualizarSelectores();
             const sorted = filtrados.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
-            const soloAfectados = sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100);
-            dataParaTabla = hayFiltros ? soloAfectados : soloAfectados.slice(0, 500);
+            
+            // Si hay filtros mostramos todo, si no el Top 500
+            dataParaTabla = hayFiltros ? sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100) : sorted.filter(s => s.tickets > 0 || s.disponibilidad < 100).slice(0, 500);
+            
             render(filtrados, hayFiltros);
         }
 
@@ -243,12 +270,11 @@
             indexActual = 0;
             cargarMasFilas();
             actualizarGraficas(mC, mA);
-            if (!selectedId) document.getElementById('titulo-lista').innerText = hayFiltros ? `Filtro (${dataParaTabla.length})` : `Top 500`;
+            if (!selectedId) document.getElementById('titulo-lista').innerText = hayFiltros ? `Resultados (${dataParaTabla.length})` : `Top 500 Críticos`;
         }
 
         function cargarMasFilas() {
             const tbody = document.getElementById('b-tabla');
-            const fragmento = document.createDocumentFragment();
             const fin = Math.min(indexActual + pasoCarga, dataParaTabla.length);
             for (let i = indexActual; i < fin; i++) {
                 const s = dataParaTabla[i];
@@ -257,23 +283,24 @@
                 tr.onclick = () => seleccionarSitio(s.ID);
                 const hrsLabel = s.mttr_horas === 0 && s.tickets > 0 ? "Pend." : s.mttr_horas.toFixed(1) + "h";
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;">${hrsLabel}</td>`;
-                fragmento.appendChild(tr);
+                tbody.appendChild(tr);
             }
-            tbody.appendChild(fragmento);
             indexActual = fin;
         }
 
         function actualizarGraficas(causas, ranking) {
             if(chart1) chart1.destroy(); if(chart2) chart2.destroy();
             const isMob = window.innerWidth < 1024;
+            
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
                 options: { 
                     maintainAspectRatio: false, 
-                    plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 8, font: { size: 8 } }, onClick: (e, item) => { registrarEstado(); document.getElementById('f-causa').value = item.text; aplicarCambios(false); } } },
+                    plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 8, font: { size: 9 } }, onClick: (e, item) => { registrarEstado(); document.getElementById('f-causa').value = item.text; aplicarCambios(false); } } },
                     onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}
                 }
             });
+
             const eA = Object.keys(ranking);
             chart2 = new Chart(document.getElementById('cAliados'), {
                 type: 'bar', data: { labels: eA, datasets: [{ data: Object.values(ranking), backgroundColor: eA.map((_, i) => coloresPaleta[i % coloresPaleta.length]) }] },
