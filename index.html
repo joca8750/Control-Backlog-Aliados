@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional</title>
+    <title>Backlog Regional - Stopper Tooltip</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -66,6 +66,23 @@
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 4px solid var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #fafafa; cursor: pointer; }
 
+        /* ESTILO PARA LA PANTALLA EMERGENTE (TOOLTIP) */
+        #tooltip-stopper {
+            position: absolute;
+            display: none;
+            background: white;
+            border: 1px solid var(--rojo);
+            border-radius: 6px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 9999;
+            max-width: 250px;
+            pointer-events: none;
+            font-size: 0.75rem;
+            color: var(--texto);
+        }
+        #tooltip-stopper b { color: var(--rojo); text-transform: uppercase; }
+
         @media (min-width: 1024px) {
             body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
@@ -76,6 +93,8 @@
 <body>
 
     <h1>Backlog Regional</h1>
+
+    <div id="tooltip-stopper"></div>
 
     <div class="toolbar">
         <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -102,10 +121,10 @@
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Cargando...</h2>
+            <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th style="width:25%">ID SITIO</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
+                    <thead><tr><th style="width:25%">ID</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -131,6 +150,19 @@
             } catch (e) { console.error(e); }
         }
 
+        // FUNCIONES DE TOOLTIP
+        function showTooltip(e, stopperText) {
+            const tt = document.getElementById('tooltip-stopper');
+            tt.innerHTML = `<b>Stopper:</b><br>${stopperText || 'Sin información'}`;
+            tt.style.display = 'block';
+            tt.style.left = (e.pageX + 15) + 'px';
+            tt.style.top = (e.pageY + 15) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip-stopper').style.display = 'none';
+        }
+
         function registrarEstado() {
             const estado = { filtros: {}, selectedId: selectedId, currentDayFilter: currentDayFilter };
             for (let id in filtrosIds) { estado.filtros[id] = document.getElementById(id).value; }
@@ -148,25 +180,19 @@
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
             let filtrados = dataFull.filter(item => {
-                // Filtro base de inventario
-                const matchFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
+                const cumpleFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
                        (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
                        (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO);
 
-                if (!matchFiltros) return false;
-
-                // REGLA DE SINCRONIZACIÓN:
-                // Si el usuario filtró por Causa o por Días, FORZAMOS que solo se cuenten fallas reales (ticket y >= 1 día)
+                if (!cumpleFiltros) return false;
                 const d = item.mttr_horas / 24;
                 const esFallaReal = (item.tickets > 0 && d >= 1);
 
                 if (selecciones.motivo_falla !== 'todos' || currentDayFilter !== null) {
-                    if (!esFallaReal) return false; // Descartamos sitios sin ticket o < 1 día
-                    
+                    if (!esFallaReal) return false;
                     if (selecciones.motivo_falla !== 'todos' && item.motivo_falla !== selecciones.motivo_falla) return false;
-
                     if (currentDayFilter) {
                         if (currentDayFilter === '>60') return d > 60;
                         if (currentDayFilter === '45-60') return d > 45 && d <= 60;
@@ -179,8 +205,7 @@
                 return true;
             });
 
-            if (selectedId) { filtrados = filtrados.filter(i => i.ID == selectedId); }
-
+            if (selectedId) filtrados = filtrados.filter(i => i.ID == selectedId);
             actualizarSelectores();
             render(filtrados);
         }
@@ -208,6 +233,7 @@
             for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value || 'todos'; }
             for (let idTarget in filtrosIds) {
                 const campoTarget = filtrosIds[idTarget];
+                const selectEl = document.getElementById(idTarget);
                 const unicos = [...new Set(dataFull.filter(item => {
                     for (let idSource in filtrosIds) {
                         if (idSource === idTarget) continue;
@@ -216,7 +242,6 @@
                     }
                     return true;
                 }).map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
-                const selectEl = document.getElementById(idTarget);
                 const valorPrevio = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
                 unicos.forEach(v => selectEl.add(new Option(v, v)));
@@ -244,7 +269,6 @@
                 }
             });
 
-            // AHORA EL TOTAL SITIOS Y SITIOS FALLA SON IGUALES CUANDO HAY FILTROS DE GRÁFICA
             document.getElementById('t-sitios').innerText = data.length; 
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = nF; 
@@ -257,6 +281,12 @@
             listaFiltrada.forEach(s => {
                 const tr = document.createElement('tr');
                 if (s.ID == selectedId) tr.className = 'selected';
+                
+                // EVENTOS DE MOUSE PARA EL TOOLTIP DEL STOPPER
+                tr.onmouseenter = (e) => showTooltip(e, s.STOPPER); // Asegúrate que en tu JSON el campo se llame STOPPER
+                tr.onmousemove = (e) => showTooltip(e, s.STOPPER);
+                tr.onmouseleave = () => hideTooltip();
+                
                 tr.onclick = () => seleccionarSitio(s.ID);
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;font-weight:bold;">${s.mttr_horas.toFixed(1)}h</td>`;
                 tbody.appendChild(tr);
@@ -294,10 +324,8 @@
                         if (el.length > 0) { filtrarPorRangoDias(clavesRango[el[0].index]); }
                         else {
                             const yAxis = chartAfectacion.scales.y;
-                            if (e.x <= yAxis.right) {
-                                const index = yAxis.getValueForPixel(e.y);
-                                if (index >= 0 && index < clavesRango.length) { filtrarPorRangoDias(clavesRango[index]); }
-                            }
+                            const index = yAxis.getValueForPixel(e.y);
+                            if (index >= 0 && index < clavesRango.length) { filtrarPorRangoDias(clavesRango[index]); }
                         }
                     }
                 }
