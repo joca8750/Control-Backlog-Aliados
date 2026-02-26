@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Interacción Total</title>
+    <title>Backlog Regional - Filtro Dinámico</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -109,7 +109,7 @@
             <h2 id="table-title">Backlog Activo (≥ 1 Día)</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th style="width:25%">ID SITIO</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
+                    <thead><tr><th style="width:25%">ID</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -143,17 +143,13 @@
         }
 
         function registrarYFiltrar() { 
-            currentDayFilter = null; 
-            selectedId = null; 
-            registrarEstado(); 
-            aplicarCambios(false); 
+            currentDayFilter = null; selectedId = null;
+            registrarEstado(); aplicarCambios(false); 
         }
 
         function filtrarPorRangoDias(rango) { 
             selectedId = null;
-            registrarEstado(); 
-            currentDayFilter = rango; 
-            aplicarCambios(false); 
+            registrarEstado(); currentDayFilter = rango; aplicarCambios(false); 
         }
 
         function aplicarCambios(conRegistro = true) {
@@ -163,19 +159,16 @@
             for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
             
             let filtrados = dataFull.filter(item => {
-                const cumpleCausa = (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
-                const esFallaReal = (item.tickets > 0 && (item.mttr_horas / 24) >= 1);
-                const activoSiCausa = (selecciones.motivo_falla === 'todos') ? true : esFallaReal;
-                
                 const matchFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
                        (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
                        (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO) &&
-                       cumpleCausa && activoSiCausa;
+                       (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
 
                 if (!matchFiltros) return false;
 
+                // FILTRADO DINÁMICO POR GRÁFICA DE DÍAS
                 if (currentDayFilter) {
                     const d = item.mttr_horas / 24;
                     if (currentDayFilter === '>60') return d > 60;
@@ -188,10 +181,7 @@
                 return true;
             });
 
-            // Si hay un ID seleccionado, filtramos el resultado final por ese ID
-            if (selectedId) {
-                filtrados = filtrados.filter(item => item.ID == selectedId);
-            }
+            if (selectedId) { filtrados = filtrados.filter(i => i.ID == selectedId); }
 
             actualizarSelectores();
             render(filtrados);
@@ -199,15 +189,9 @@
 
         function seleccionarSitio(id) {
             selectedId = id;
-            const s = dataFull.find(item => item.ID == id);
-            if (s) {
-                // Sincronizar visualmente los combos antes de aplicar
-                for (let key in filtrosIds) {
-                    document.getElementById(key).value = s[filtrosIds[key]];
-                }
-            }
-            registrarEstado();
-            aplicarCambios(false);
+            const s = dataFull.find(i => i.ID == id);
+            if (s) { for (let key in filtrosIds) { document.getElementById(key).value = s[filtrosIds[key]]; } }
+            registrarEstado(); aplicarCambios(false);
             if(window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -217,8 +201,7 @@
             for (let id in ultimo.filtros) { document.getElementById(id).value = ultimo.filtros[id]; }
             selectedId = ultimo.selectedId;
             currentDayFilter = ultimo.currentDayFilter;
-            actualizarSelectores();
-            aplicarCambios(false);
+            actualizarSelectores(); aplicarCambios(false);
             if (historial.length === 0) document.getElementById('btn-return').disabled = true;
         }
 
@@ -263,15 +246,16 @@
                 }
             });
 
-            document.getElementById('t-sitios').innerText = data.length;
+            // AQUÍ SE FILTRA EL TOTAL SITIOS AL SELECCIONAR GRÁFICAS
+            document.getElementById('t-sitios').innerText = data.length; 
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = nF;
+            document.getElementById('t-falla').innerText = nF; 
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
-            sorted.forEach(s => {
+            sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1).forEach(s => {
                 const tr = document.createElement('tr');
                 if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => seleccionarSitio(s.ID);
@@ -279,7 +263,7 @@
                 tbody.appendChild(tr);
             });
             
-            document.getElementById('table-title').innerText = selectedId ? `Detalle Sitio: ${selectedId}` : "Backlog Activo (≥ 1 Día)";
+            document.getElementById('table-title').innerText = currentDayFilter ? `Filtrado: ${currentDayFilter} Días` : "Backlog Activo (≥ 1 Día)";
             actualizarGraficas(mC, r_dias);
         }
 
@@ -287,43 +271,36 @@
             if(chart1) chart1.destroy(); if(chartAfectacion) chartAfectacion.destroy();
             const isMob = window.innerWidth < 1024;
             
-            // Gráfica 1: Distribución (Sincronizada con Leyenda)
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut', 
                 data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
-                options: { 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { 
-                            position: isMob ? 'bottom' : 'right', 
-                            labels: { boxWidth: 10, font: { size: 9 } },
-                            onClick: (e, item) => {
-                                registrarEstado();
-                                document.getElementById('f-causa').value = item.text;
-                                aplicarCambios(false);
-                            }
-                        }
-                    },
-                    onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}
-                }
+                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } },
+                onClick: (e, item) => { registrarEstado(); document.getElementById('f-causa').value = item.text; aplicarCambios(false); }
+                }},
+                onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}}
             });
 
-            // Gráfica 2: Afectación (Interactividad Total)
             const clavesRango = ['>60', '45-60', '30-45', '15-30', '5-15', '1-5'];
             chartAfectacion = new Chart(document.getElementById('cAfectacionDias'), {
                 type: 'bar', 
                 data: { 
                     labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
-                    datasets: [{ 
-                        data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
-                        backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'],
-                        borderRadius: 5
-                    }] 
+                    datasets: [{ data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
+                    backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] 
                 },
                 options: { 
                     maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
                     scales: { y: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }, x: { beginAtZero: true, grid: { color: '#eee' } } },
-                    onClick: (e, el) => { if(el.length > 0) filtrarPorRangoDias(clavesRango[el[0].index]); }
+                    onClick: (e, el) => {
+                        if (el.length > 0) { filtrarPorRangoDias(clavesRango[el[0].index]); }
+                        else {
+                            const yAxis = chartAfectacion.scales.y;
+                            if (e.x <= yAxis.right) {
+                                const index = yAxis.getValueForPixel(e.y);
+                                if (index >= 0 && index < clavesRango.length) { filtrarPorRangoDias(clavesRango[index]); }
+                            }
+                        }
+                    }
                 }
             });
         }
