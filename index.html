@@ -14,9 +14,9 @@
             --rojo: #D32F2F; 
             --gris-fondo: #F4F7F6; 
             --texto: #212121; 
+            --borde: #E0E0E0;
         }
 
-        /* CONFIGURACIÓN GLOBAL: ROBOTO, SIN NEGRILLA, SIN CURSIVA */
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif !important;
@@ -26,127 +26,41 @@
 
         body { 
             background: var(--gris-fondo); 
-            margin: 0; 
-            padding: 10px 20px; 
+            margin: 0; padding: 10px 20px; 
             color: var(--texto); 
-            height: 100vh;
-            overflow: hidden; 
+            height: 100vh; overflow: hidden; 
         }
 
-        h1 { 
-            text-transform: uppercase; 
-            color: var(--rojo); 
-            letter-spacing: 1px; 
-            text-align: center;
-            font-size: 2.2rem; 
-            margin: 15px 0; 
-        }
+        h1 { text-transform: uppercase; color: var(--rojo); letter-spacing: 1px; text-align: center; font-size: 2.2rem; margin: 10px 0; }
+        h2 { color: var(--rojo); font-size: 1.2rem; margin: 0 0 12px 0; text-transform: uppercase; text-align: center; }
 
-        h2 { 
-            color: var(--rojo); 
-            font-size: 1.2rem; 
-            margin: 0 0 10px 0; 
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        /* BARRA DE FILTROS */
         .toolbar { 
-            background: white; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            display: flex; 
-            flex-wrap: wrap;
-            gap: 15px; 
-            align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            background: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
+            display: flex; flex-wrap: wrap; gap: 15px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
         .filter-group { display: flex; align-items: center; gap: 8px; }
-        label { font-size: 0.85rem; color: #555; text-transform: uppercase; }
+        label { font-size: 0.85rem; color: #666; text-transform: uppercase; }
+        select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.85rem; min-width: 150px; background: #fff; outline: none; }
 
-        select { 
-            padding: 6px 10px; 
-            border-radius: 4px; 
-            border: 1px solid #ddd; 
-            font-size: 0.85rem;
-            min-width: 150px; 
-            background: #fff;
-            outline: none;
-        }
+        .resumen-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
+        .card h3 { color: #777; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 2.2rem; color: var(--rojo); margin: 5px 0; }
 
-        /* TARJETAS KPI */
-        .resumen-container { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            margin-bottom: 15px; 
-        }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 15px; height: calc(100vh - 280px); }
+        .chart-container, .tabla-critica { background: white; padding: 18px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; overflow: hidden; }
 
-        .card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border-top: 2px solid var(--rojo); 
-            text-align: center; 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.05); 
-        }
-
-        .card h3 { color: #666; font-size: 0.85rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 2rem; color: var(--rojo); margin: 5px 0; }
-
-        /* GRID DEL DASHBOARD */
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr 1.5fr; 
-            gap: 15px; 
-            height: calc(100vh - 270px); 
-        }
-
-        .chart-container, .tabla-critica { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .table-wrapper { overflow-y: auto; flex-grow: 1; }
+        .table-wrapper { overflow-y: auto; flex-grow: 1; border: 1px solid #f0f0f0; }
         table { width: 100%; border-collapse: collapse; }
-        th { 
-            border-bottom: 1px solid var(--rojo); 
-            padding: 10px; 
-            text-align: left; 
-            font-size: 0.8rem; 
-            text-transform: uppercase;
-            color: #888;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 5;
-        }
-        td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
-        tr:hover { background: #f9f9f9; }
+        th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #888; position: sticky; top: 0; background: white; z-index: 10; }
+        td { padding: 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.85rem; }
+        
+        tr[onclick] { cursor: pointer; transition: background 0.2s; }
+        tr[onclick]:hover { background: #FEEBEB; }
 
-        .btn-excel { 
-            background: var(--rojo); 
-            color: white; 
-            border: none; 
-            padding: 8px 18px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 0.85rem; 
-            text-transform: uppercase;
-            margin-left: auto;
-        }
-
-        @media (max-width: 1100px) {
-            .dashboard-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
-            body { overflow-y: auto; height: auto; }
-        }
+        .btn-excel { background: var(--rojo); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; }
+        .btn-reset { background: #555; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; margin-left: auto; }
     </style>
 </head>
 <body>
@@ -154,23 +68,12 @@
     <h1>Panel de Control Backlog Aliados: R3</h1>
 
     <div class="toolbar">
-        <div class="filter-group">
-            <label>Regional</label>
-            <select id="f-regional" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Depto</label>
-            <select id="f-depto" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Aliado</label>
-            <select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
-        </div>
-        <div class="filter-group">
-            <label>Topología</label>
-            <select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select>
-        </div>
-        <button class="btn-excel" onclick="exportarExcel()">Descargar Excel</button>
+        <div class="filter-group"><label>Regional</label><select id="f-regional" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <div class="filter-group"><label>Depto</label><select id="f-depto" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <div class="filter-group"><label>Aliado</label><select id="f-aliado" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <div class="filter-group"><label>Topología</label><select id="f-topologia" onchange="aplicarCambios()"><option value="todos">Todos</option></select></div>
+        <button class="btn-excel" onclick="exportarExcel()">Excel</button>
+        <button class="btn-reset" onclick="resetearFiltros()">Restablecer Todo</button>
     </div>
 
     <div class="resumen-container">
@@ -182,12 +85,12 @@
 
     <div class="dashboard-grid">
         <div class="chart-container"><h2>Distribución</h2><div style="flex-grow:1;"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Ranking Aliados</h2><div style="flex-grow:1;"><canvas id="cAliados"></canvas></div></div>
+        <div class="chart-container"><h2>Ranking Aliado</h2><div style="flex-grow:1;"><canvas id="cAliados"></canvas></div></div>
         <div class="tabla-critica">
-            <h2>Lista de Backlog</h2>
+            <h2>Lista de Backlog (Seleccione un sitio)</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th>ID</th><th>Aliado</th><th>Estado</th><th>Hrs</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Aliado</th><th>Estado</th><th style="text-align: right;">Hrs</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -197,29 +100,21 @@
     <script>
         let dataFull = [];
         let chart1, chart2;
-
-        const camposFiltros = {
-            'f-regional': 'REGIONAL',
-            'f-depto': 'DEPARTAMENTO',
-            'f-aliado': 'ALIADO',
-            'f-topologia': 'TOPOLOGIA'
-        };
+        const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA'};
 
         async function init() {
             try {
                 const res = await fetch('data_ben.json');
                 dataFull = await res.json();
-                actualizarOpcionesSelectores();
+                actualizarSelectores();
                 aplicarCambios(); 
-            } catch (e) { console.error("Error cargando JSON", e); }
+            } catch (e) { console.error(e); }
         }
 
         function aplicarCambios() {
             const selecciones = {};
-            for (let id in camposFiltros) {
-                selecciones[camposFiltros[id]] = document.getElementById(id).value;
-            }
-
+            for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value; }
+            
             const filtrados = dataFull.filter(item => {
                 return (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
                        (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
@@ -227,50 +122,59 @@
                        (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA);
             });
 
-            actualizarOpcionesSelectores();
+            actualizarSelectores();
             render(filtrados);
         }
 
-        function actualizarOpcionesSelectores() {
+        // FUNCIÓN CLAVE: Al hacer clic en un sitio, forzamos los filtros a ese sitio
+        function seleccionarSitio(id) {
+            const sitio = dataFull.find(s => s.ID == id);
+            if (!sitio) return;
+
+            // Actualizamos los valores de los selectores para que coincidan con el sitio
+            document.getElementById('f-regional').value = sitio.REGIONAL;
+            document.getElementById('f-depto').value = sitio.DEPARTAMENTO;
+            document.getElementById('f-aliado').value = sitio.ALIADO;
+            document.getElementById('f-topologia').value = sitio.TOPOLOGIA;
+
+            // Ejecutamos el renderizado solo para ese registro
+            render([sitio]);
+        }
+
+        function resetearFiltros() {
+            for (let id in filtrosIds) { document.getElementById(id).value = 'todos'; }
+            actualizarSelectores();
+            render(dataFull);
+        }
+
+        function actualizarSelectores() {
             const actuales = {};
-            for (let id in camposFiltros) { actuales[id] = document.getElementById(id).value; }
+            for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value; }
 
-            for (let idTarget in camposFiltros) {
-                const campoTarget = camposFiltros[idTarget];
+            for (let idTarget in filtrosIds) {
+                const campoTarget = filtrosIds[idTarget];
                 const selectEl = document.getElementById(idTarget);
-
+                
                 const dataParaOpciones = dataFull.filter(item => {
-                    for (let idSource in camposFiltros) {
+                    for (let idSource in filtrosIds) {
                         if (idSource === idTarget) continue;
                         const valSource = actuales[idSource];
-                        const campoSource = camposFiltros[idSource];
-                        if (valSource !== 'todos' && item[campoSource] !== valSource) return false;
+                        if (valSource !== 'todos' && item[filtrosIds[idSource]] !== valSource) return false;
                     }
                     return true;
                 });
 
-                const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))]
-                    .filter(v => v && v !== "N/A" && v !== "undefined")
-                    .sort();
-
+                const unicos = [...new Set(dataParaOpciones.map(i => i[campoTarget]))].filter(v => v && v !== "N/A").sort();
                 const guardado = actuales[idTarget];
                 selectEl.innerHTML = '<option value="todos">Todos</option>';
-                unicos.forEach(v => {
-                    selectEl.add(new Option(v, v));
-                });
-
-                if ([...selectEl.options].some(o => o.value === guardado)) {
-                    selectEl.value = guardado;
-                }
+                unicos.forEach(v => selectEl.add(new Option(v, v)));
+                if ([...selectEl.options].some(o => o.value === guardado)) selectEl.value = guardado;
             }
         }
 
         function render(data) {
-            // ORDENAMIENTO: De mayor a menor horas (mttr_horas)
-            const dataOrdenada = [...data].sort((a, b) => b.mttr_horas - a.mttr_horas);
-
-            let sDisp = 0, tFallas = 0, sMTTR = 0;
-            let causas = {}, rankingAliados = {};
+            const dataOrdenada = [...data].sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
+            let sDisp = 0, tFallas = 0, sMTTR = 0, causas = {}, rankingAliados = {};
             const tbody = document.getElementById('b-tabla');
             tbody.innerHTML = "";
 
@@ -282,23 +186,30 @@
                 rankingAliados[s.ALIADO] = (rankingAliados[s.ALIADO] || 0) + (s.tickets > 0 ? 1 : 0);
 
                 if(s.disponibilidad < 100) {
-                    tbody.innerHTML += `<tr><td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td><td>${s.mttr_horas.toFixed(1)}h</td></tr>`;
+                    tbody.innerHTML += `<tr onclick="seleccionarSitio('${s.ID}')">
+                        <td>${s.ID}</td><td>${s.ALIADO}</td><td>${s.motivo_falla}</td>
+                        <td style="color:var(--rojo); text-align: right;">${parseFloat(s.mttr_horas).toFixed(1)}h</td>
+                    </tr>`;
                 }
             });
 
             document.getElementById('d-global').innerText = (data.length > 0 ? sDisp / data.length : 0).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = tFallas;
             document.getElementById('m-promedio').innerText = (data.length > 0 ? sMTTR / data.length : 0).toFixed(1) + "h";
-            const critico = data.length > 0 ? data.reduce((p, c) => (p.mttr_horas > c.mttr_horas) ? p : c) : null;
+            const critico = data.length > 0 ? data.reduce((p, c) => (parseFloat(p.mttr_horas) > parseFloat(c.mttr_horas) ? p : c)) : null;
             document.getElementById('s-critico').innerText = critico ? critico['ID'] : "--";
 
-            if(chart1) chart1.destroy();
-            if(chart2) chart2.destroy();
-            chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#546E7A', '#90A4AE', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
-            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: Object.keys(rankingAliados), datasets: [{ label: 'Fallas', data: Object.values(rankingAliados), backgroundColor: '#D32F2F' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }}}});
+            actualizarGraficas(causas, rankingAliados);
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_R3.xlsx"); }
+        function actualizarGraficas(causas, ranking) {
+            if(chart1) chart1.destroy();
+            if(chart2) chart2.destroy();
+            chart1 = new Chart(document.getElementById('cFallas'), { type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#455A64', '#78909C', '#B0BEC5', '#CFD8DC'], borderWidth: 0 }] }, options: { maintainAspectRatio: false }});
+            chart2 = new Chart(document.getElementById('cAliados'), { type: 'bar', data: { labels: Object.keys(ranking), datasets: [{ label: 'Fallas', data: Object.values(ranking), backgroundColor: '#D32F2F' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }}}});
+        }
+
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte.xlsx"); }
         init();
     </script>
 </body>
