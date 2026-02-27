@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Interactivo</title>
+    <title>Backlog Regional</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,99 +12,76 @@
     <style>
         :root { 
             --rojo: #D32F2F; 
-            --gris-fondo: #F8F9FA; 
-            --texto: #2D3436; 
-            --borde: #dfe6e9;
-            --primario: #0984e3; /* Azul interactivo */
-            --sombra: rgba(0, 0, 0, 0.08);
+            --gris-fondo: #F4F7F6; 
+            --texto: #212121; 
+            --borde: #E0E0E0;
+            --azul-return: #2c3e50;
+            --azul-search: #1976D2;
+            --verde-excel: #2e7d32;
         }
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.3rem; margin: 12px 0; letter-spacing: 1px; font-weight: 900; }
-        h2 { color: #636e72; font-size: 0.85rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.2rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
+        h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
 
-        /* TOOLBAR MINIMALISTA E INTERACTIVA */
+        /* TOOLBAR */
         .toolbar { 
-            background: #ffffff; padding: 15px; border-radius: 12px; margin-bottom: 15px; 
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
-            box-shadow: 0 4px 20px var(--sombra); 
+            background: white; padding: 10px; border-radius: 8px; margin-bottom: 12px; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
         }
 
-        .filter-group { display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 140px; position: relative; }
-        .filter-group label { font-size: 0.65rem; font-weight: 700; color: #b2bec3; text-transform: uppercase; padding-left: 5px; transition: color 0.3s; }
+        .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 100px; }
+        label { font-size: 0.55rem; color: #666; text-transform: uppercase; font-weight: 500; }
         
-        /* Efecto al interactuar con el grupo */
-        .filter-group:focus-within label { color: var(--primario); }
-
         select { 
-            padding: 8px 12px; border-radius: 10px; border: 2px solid var(--borde); font-size: 0.8rem; 
-            background: #fff; width: 100%; height: 40px; cursor: pointer; font-weight: 500; color: var(--texto);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="%23b2bec3" d="M7 10l5 5 5-5z"/></svg>');
-            background-repeat: no-repeat; background-position: right 12px center;
+            padding: 5px 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.75rem; background: #fff; width: 100%; height: 32px; cursor: pointer;
+            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat; background-position: right 8px center;
         }
 
-        /* INTERACTIVIDAD PURA */
-        select:hover { 
-            border-color: #b2bec3; 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px var(--sombra);
-        }
-
-        select:focus { 
-            outline: none; 
-            border-color: var(--primario); 
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(9, 132, 227, 0.1);
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="%230984e3" d="M7 10l5 5 5-5z"/></svg>');
-        }
-
-        /* BOTONES */
-        .btn-container { display: flex; gap: 12px; width: 100%; justify-content: center; margin-top: 10px; }
-        .btn { 
-            padding: 10px 22px; border-radius: 10px; border: none; color: white; text-transform: uppercase; 
-            font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 8px; 
-            font-weight: 700; transition: all 0.3s ease; 
-        }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); filter: brightness(1.1); }
-        .btn:active { transform: translateY(0); }
+        .btn-container { display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
+        .btn { padding: 8px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: 0.2s; }
         
-        .btn-excel { background: #27ae60; }
-        .btn-search { background: var(--primario); }
-        .btn-return { background: #636e72; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+        .btn-excel { background: var(--verde-excel); }
+        .btn-search { background: var(--azul-search); }
+        .btn-return { background: var(--azul-return); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* KPIs */
-        .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .card { background: white; padding: 12px; border-radius: 15px; border-bottom: 4px solid #dfe6e9; text-align: center; transition: all 0.3s; }
-        .card:hover { border-bottom-color: var(--rojo); transform: translateY(-5px); box-shadow: 0 8px 20px var(--sombra); }
-        .card h3 { color: #b2bec3; font-size: 0.65rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 1.4rem; color: var(--rojo); margin: 5px 0; font-weight: 900; }
+        .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; }
+        .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card h3 { color: #777; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
-        /* DASHBOARD GRID */
-        .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
-        .chart-container, .tabla-critica { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 15px var(--sombra); }
-        
-        .table-wrapper { overflow-x: auto; max-height: 450px; border-radius: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 12px 10px; text-align: left; font-size: 0.7rem; color: #636e72; position: sticky; top: 0; background: white; z-index: 10; }
-        td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; font-size: 0.8rem; }
+        /* GRID PRINCIPAL */
+        .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
+        .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
+        .chart-box { height: 260px; position: relative; }
 
-        tr.selected td { background-color: #fff5f5 !important; color: var(--rojo); font-weight: 700; }
-        tr:hover td { background-color: #f8f9fa; cursor: pointer; }
+        /* TABLA DINÁMICA */
+        .table-wrapper { overflow-x: auto; max-height: 400px; border: 1px solid #f0f0f0; border-radius: 4px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; table-layout: fixed; }
+        th { border-bottom: 2px solid var(--rojo); padding: 8px 6px; text-align: left; font-size: 0.65rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; font-weight: 700; }
+        td { padding: 8px 6px; border-bottom: 1px solid #f5f5f5; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 4px solid var(--rojo); font-weight: 700; }
+        tr:hover td { background-color: #fafafa; cursor: pointer; }
+
+        /* TOOLTIP STOPPER */
         #tooltip-stopper {
-            position: fixed; display: none; background: #ffffff; border-radius: 12px;
-            padding: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 10000; max-width: 380px;
-            pointer-events: none; border-left: 5px solid var(--rojo);
+            position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 8px;
+            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 350px;
+            pointer-events: none; font-size: 0.85rem; color: #333; line-height: 1.3;
         }
+        #tooltip-stopper b { color: var(--rojo); display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; }
 
         @media (min-width: 1024px) {
-            body { padding: 20px 30px; height: 100vh; overflow: hidden; }
+            body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 2fr; height: calc(100vh - 260px); align-items: start; gap: 20px; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.8fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
             .btn-container { width: auto; margin-top: 0; }
         }
     </style>
@@ -112,6 +89,7 @@
 <body>
 
     <h1>Backlog Regional</h1>
+
     <div id="tooltip-stopper"></div>
 
     <div class="toolbar">
@@ -125,7 +103,7 @@
         <div class="btn-container">
             <button class="btn btn-search" onclick="buscarPorID()">🔍 Buscar ID</button>
             <button class="btn btn-excel" onclick="exportarExcel()">📥 Excel</button>
-            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Volver</button>
+            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Return</button>
         </div>
     </div>
 
@@ -133,23 +111,23 @@
         <div class="card"><h3>Total Sitios</h3><p id="t-sitios">0</p></div>
         <div class="card"><h3>Disponibilidad</h3><p id="d-global">0%</p></div>
         <div class="card"><h3>Sitios Falla</h3><p id="t-falla">0</p></div>
-        <div class="card"><h3>Hrs Promedio</h3><p id="m-promedio">0h</p></div>
-        <div class="card"><h3>Días Promedio</h3><p id="d-promedio">0d</p></div>
+        <div class="card"><h3>Prom. Horas</h3><p id="m-promedio">0h</p></div>
+        <div class="card"><h3>Prom. Días</h3><p id="d-promedio">0d</p></div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
+        <div class="chart-container"><h2>Distribución Fallas</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
+        <div class="chart-container"><h2>Afectación x Tiempo</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
             <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr>
-                        <th style="width:80px">ID</th>
-                        <th style="width:120px">ALIADO</th>
-                        <th style="width:70px; text-align:right;">DÍAS</th>
-                        <th style="width:80px; text-align:right;">HORAS</th>
-                        <th>STOPPER / GESTIÓN</th>
+                        <th style="width:70px">ID</th>
+                        <th style="width:100px">ALIADO</th>
+                        <th style="width:60px; text-align:right;">DÍAS</th>
+                        <th style="width:70px; text-align:right;">HORAS</th>
+                        <th>STOPPER</th>
                     </tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
@@ -167,23 +145,20 @@
 
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
-            const val = item.STOPPER || "SIN STOPPER";
-            tt.innerHTML = `
-                <div style="font-size: 0.7rem; color: #b2bec3; font-weight: 700; margin-bottom: 5px;">ID: ${item.ID} | ${item.MUNICIPIO}</div>
-                <div style="font-size: 1rem; font-weight: 700; color: #2d3436; margin-bottom: 8px;">${val}</div>
-                <div style="font-size: 0.75rem; color: #636e72;"><b>Causa:</b> ${item.motivo_falla}</div>`;
+            const stopperTxt = item.STOPPER || "SIN STOPPER";
+            tt.innerHTML = `<b>GESTIÓN - ID: ${item.ID}</b><div style="font-size:0.95rem; font-weight:600;">${stopperTxt}</div><div style="margin-top:5px; font-size:0.7rem; color:gray;">Municipio: ${item.MUNICIPIO}</div>`;
             tt.style.display = 'block';
             let x = e.clientX + 20; let y = e.clientY + 20;
-            if (x + 380 > window.innerWidth) x = e.clientX - 390;
-            if (y + 180 > window.innerHeight) y = e.clientY - 190;
+            if (x + 350 > window.innerWidth) x = e.clientX - 360;
+            if (y + 150 > window.innerHeight) y = e.clientY - 150;
             tt.style.left = x + 'px'; tt.style.top = y + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
         function buscarPorID() {
-            const id = prompt("ID del sitio:");
-            if (!id) return;
-            const s = dataFull.find(i => String(i.ID) === id.trim());
+            const idBusca = prompt("Ingrese el ID del sitio:");
+            if (!idBusca) return;
+            const s = dataFull.find(i => String(i.ID) === idBusca.trim());
             if (s) { registrarEstado(); seleccionarSitio(s.ID); } else { alert("ID no encontrado"); }
         }
 
@@ -284,10 +259,10 @@
                 tr.onmouseenter = (e) => showTooltip(e, s); tr.onmousemove = (e) => showTooltip(e, s); tr.onmouseleave = hideTooltip;
                 tr.onclick = () => { hideTooltip(); registrarEstado(); seleccionarSitio(s.ID); };
                 const st = s.STOPPER || "SIN STOPPER";
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="text-align:right; font-weight:700; color:var(--rojo)">${s.mttr_horas.toFixed(1)}h</td><td style="color:#636e72; font-style:italic; font-size:0.75rem">${st}</td>`;
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="text-align:right; font-weight:bold; color:var(--rojo)">${s.mttr_horas.toFixed(1)}h</td><td style="color:#666; font-style:italic">${st}</td>`;
                 tb.appendChild(tr);
             });
-            document.getElementById('table-title').innerText = selectedId ? `Resultado para ID: ${selectedId}` : `Backlog Activo (${nF} sitios)`;
+            document.getElementById('table-title').innerText = selectedId ? `Detalle Sitio: ${selectedId}` : `Backlog Activo (${nF})`;
             actCharts(mC, r_d);
         }
 
@@ -295,12 +270,12 @@
             if(chart1) chart1.destroy(); if(chartAfectacion) chartAfectacion.destroy();
             const isMob = window.innerWidth < 1024;
             chart1 = new Chart(document.getElementById('cFallas'), {
-                type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#0984e3', '#00cec9', '#fab1a0', '#e17055', '#2d3436', '#6c5ce7'], borderWidth: 0 }] },
+                type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'], borderWidth: 0 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } }, onClick: (e, it) => { registrarEstado(); document.getElementById('f-causa').value = it.text; aplicarCambios(false); } }}}
             });
             chartAfectacion = new Chart(document.getElementById('cAfectacionDias'), {
                 type: 'bar', data: { labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
-                datasets: [{ data: [r_d['>60'], r_d['45-60'], r_d['30-45'], r_d['15-30'], r_d['5-15'], r_d['1-5']], backgroundColor: ['#d63031', '#ff7675', '#fab1a0', '#fdcb6e', '#ffeaa7', '#dfe6e9'], borderRadius: 5 }] },
+                datasets: [{ data: [r_d['>60'], r_d['45-60'], r_d['30-45'], r_d['15-30'], r_d['5-15'], r_d['1-5']], backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] },
                 options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, onClick: (e, el) => { if(el.length > 0) filtrarPorRangoDias(['>60', '45-60', '30-45', '15-30', '5-15', '1-5'][el[0].index]); }}
             });
         }
