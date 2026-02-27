@@ -3,40 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Vigencia OT</title>
+    <title>Backlog Regional - Sistema de Vigencia</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --rojo: #D32F2F; --gris-fondo: #F4F7F6; --texto: #212121; --azul-search: #1976D2; --verde-excel: #2e7d32; --azul-return: #34495e; }
+        :root { 
+            --rojo: #D32F2F; 
+            --gris-fondo: #F4F7F6; 
+            --texto: #212121; 
+            --borde: #dfe6e9;
+            --azul-search: #1976D2; 
+            --verde-excel: #2e7d32; 
+            --azul-return: #34495e;
+        }
+
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.1rem; margin: 8px 0; font-weight: 700; }
-        h2 { color: var(--rojo); font-size: 0.8rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 700; width: 100%; }
 
-        .toolbar { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.1rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
+        h2 { color: var(--rojo); font-size: 0.75rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 700; width: 100%; }
+
+        /* TOOLBAR */
+        .toolbar { 
+            background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+        }
+
         .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 100px; }
         label { font-size: 0.55rem; color: #b2bec3; text-transform: uppercase; font-weight: 700; padding-left: 4px; }
-        select { padding: 4px 8px; border-radius: 6px; border: 1px solid #dfe6e9; font-size: 0.7rem; background: #fff; height: 30px; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; }
+        
+        select { 
+            padding: 4px 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.7rem; background: #fff; height: 30px; cursor: pointer;
+            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat; background-position: right 8px center;
+        }
 
         .btn-container { display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
         .btn { padding: 7px 14px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.6rem; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        
         .btn-excel { background: var(--verde-excel); }
         .btn-search { background: var(--azul-search); }
         .btn-return { background: var(--azul-return); }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* KPIs */
         .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px; }
         .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; }
         .card h3 { color: #888; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
+        /* DASHBOARD GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
-        .chart-container, .tabla-critica { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .chart-box { height: 240px; position: relative; }
+        .chart-container, .tabla-critica { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; }
+        .chart-box { height: 220px; position: relative; }
 
-        .table-wrapper { overflow-x: auto; max-height: 420px; border-radius: 6px; overflow-y: auto; border: 1px solid #f0f0f0; }
+        /* TABLA COMPACTA */
+        .table-wrapper { overflow-x: auto; max-height: 400px; border-radius: 6px; overflow-y: auto; border: 1px solid #f0f0f0; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 8px 4px; text-align: left; font-size: 0.6rem; color: #999; position: sticky; top: 0; background: white; z-index: 10; text-transform: uppercase; }
         td { padding: 6px 4px; border-bottom: 1px solid #f1f2f6; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -44,13 +70,18 @@
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #f8f9fa; cursor: pointer; }
 
-        #tooltip-stopper { position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 10px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 380px; pointer-events: none; font-size: 0.8rem; line-height: 1.4; }
+        #tooltip-stopper {
+            position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 10px;
+            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 380px;
+            pointer-events: none; font-size: 0.8rem; line-height: 1.4;
+        }
+        .tt-section { margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px; }
         .tt-label { font-size: 0.55rem; color: #999; text-transform: uppercase; font-weight: 800; display: block; }
 
         @media (min-width: 1024px) {
             body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.1fr 2.4fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.3fr 2.2fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
             .btn-container { width: auto; margin-top: 0; }
         }
     </style>
@@ -86,7 +117,7 @@
         <div class="chart-container"><h2>Distribución Fallas</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
         <div class="chart-container"><h2>Rango Vigencia OT</h2><div class="chart-box"><canvas id="cRangoOT"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Cargando...</h2>
+            <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr>
@@ -115,9 +146,9 @@
             const tt = document.getElementById('tooltip-stopper');
             tt.innerHTML = `
                 <b style="color:var(--rojo); border-bottom: 2px solid var(--rojo); display:block; padding-bottom:5px; margin-bottom:10px;">ID: ${item.ID} | ${item.MUNICIPIO}</b>
-                <div style="margin-bottom:6px;"><span class="tt-label">Vigencia OT:</span><b>${item.RANGO_OT || "SIN RANGO"}</b></div>
-                <div style="margin-bottom:6px;"><span class="tt-label">Gestión:</span><b>${item.STOPPER || "SIN STOPPER"}</b></div>
-                <div style="margin-bottom:6px;"><span class="tt-label">OT Relacionada:</span><b>${item.OT_REL || "SIN OT"}</b></div>
+                <div class="tt-section"><span class="tt-label">Rango Vigencia OT:</span><b>${item.RANGO_OT || "SIN RANGO"}</b></div>
+                <div class="tt-section"><span class="tt-label">Gestión:</span><b>${item.STOPPER || "SIN STOPPER"}</b></div>
+                <div class="tt-section"><span class="tt-label">OT Relacionada:</span><b>${item.OT_REL || "SIN OT"}</b></div>
             `;
             tt.style.display = 'block';
             let x = e.clientX + 20; let y = e.clientY + 20;
@@ -146,16 +177,14 @@
                 if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
                 if (sel.TOPOLOGIA !== 'todos' && i.TOPOLOGIA !== sel.TOPOLOGIA) return false;
                 if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
+                if (sel.motivo_falla !== 'todos' && i.motivo_falla !== sel.motivo_falla) return false;
                 
-                if (currentOTFilter) {
-                    if (i.RANGO_OT !== currentOTFilter) return false;
-                }
+                // El filtro de la gráfica Rango Vigencia OT
+                if (currentOTFilter && i.RANGO_OT !== currentOTFilter) return false;
                 
-                if (sel.motivo_falla !== 'todos' && i.motivo_falla !== sel.motivo_falla) {
-                    if (i.tickets > 0) return false;
-                }
                 return true;
             });
+
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
             actualizarSelectores(); render(filtered);
         }
@@ -163,10 +192,10 @@
         function render(data) {
             const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
             let sD = 0, sH = 0, nF = 0, mC = {};
-            // Rangos específicos solicitados
             let r_ot = { 'MENOR A 5 DIAS': 0, 'DE 5 A 15 DIAS': 0, 'DE 15 A 30 DIAS': 0, 'DE 30 A 45 DIAS': 0, 'DE 45 A 60 DIAS': 0, 'MAYOR A 60 DIAS': 0 };
 
-            sorted.forEach(s => {
+            // Solo contamos los sitios que están en falla (tickets > 0) para las gráficas
+            data.forEach(s => {
                 sD += s.disponibilidad;
                 if (s.tickets > 0) {
                     nF++; sH += s.mttr_horas;
@@ -196,25 +225,45 @@
         function actCharts(causas, r_ot) {
             if(chart1) chart1.destroy(); if(chartOT) chartOT.destroy();
             const isMob = window.innerWidth < 1024;
+            
+            // Gráfica de Causas
             chart1 = new Chart(document.getElementById('cFallas'), {
                 type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } }}}
+                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 8 } } }}}
             });
+
+            // Gráfica de Vigencia OT (Columnas Verticales)
             chartOT = new Chart(document.getElementById('cRangoOT'), {
-                type: 'bar', data: { 
-                    labels: Object.keys(r_ot), 
-                    datasets: [{ data: Object.values(r_ot), backgroundColor: ['#B0BEC5', '#F9A825', '#E64A19', '#D32F2F', '#B71C1C', '#7f0000'], borderRadius: 5 }] 
+                type: 'bar', 
+                data: { 
+                    labels: ['< 5 d', '5-15 d', '15-30 d', '30-45 d', '45-60 d', '> 60 d'], 
+                    datasets: [{ 
+                        data: [r_ot['MENOR A 5 DIAS'], r_ot['DE 5 A 15 DIAS'], r_ot['DE 15 A 30 DIAS'], r_ot['DE 30 A 45 DIAS'], r_ot['DE 45 A 60 DIAS'], r_ot['MAYOR A 60 DIAS']], 
+                        backgroundColor: ['#B0BEC5', '#F9A825', '#E64A19', '#D32F2F', '#B71C1C', '#7f0000'],
+                        borderRadius: 4
+                    }] 
                 },
                 options: { 
-                    maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
-                    onClick: (e, el) => { if(el.length > 0) { currentOTFilter = Object.keys(r_ot)[el[0].index]; aplicarCambios(); } }
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { ticks: { font: { size: 8, weight: 'bold' } }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { font: { size: 9 } } }
+                    },
+                    onClick: (e, el) => { 
+                        if(el.length > 0) { 
+                            const labelsMap = ['MENOR A 5 DIAS', 'DE 5 A 15 DIAS', 'DE 15 A 30 DIAS', 'DE 30 A 45 DIAS', 'DE 45 A 60 DIAS', 'MAYOR A 60 DIAS'];
+                            currentOTFilter = labelsMap[el[0].index]; 
+                            aplicarCambios(); 
+                        } 
+                    }
                 }
             });
         }
 
         function buscarPorID() {
             const id = prompt("Ingrese el ID:");
-            if (id) { const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { registrarEstado(); selectedId = s.ID; aplicarCambios(false); } }
+            if (id) { const s = dataFull.find(i => String(i.ID) === id.strip()); if (s) { registrarEstado(); selectedId = s.ID; aplicarCambios(false); } }
         }
 
         function pasoAtras() {
@@ -243,7 +292,7 @@
         function exportarExcel() { 
             const tabla = document.getElementById('tSitios');
             const wb = XLSX.utils.table_to_book(tabla, {sheet: "Backlog"});
-            XLSX.writeFile(wb, "Reporte_Backlog_Vigencia.xlsx"); 
+            XLSX.writeFile(wb, "Reporte_Vigencia_OT.xlsx"); 
         }
         init();
     </script>
