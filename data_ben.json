@@ -39,7 +39,7 @@
         "mttr_horas": 377.3,
         "motivo_falla": "7. SERVICIO OPERATIVO",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Pendiente validación técnica por parte del Aliado CINCO"
+        "STOPPER": "Revisión de Fibra Óptica"
     },
     {
         "ID": "18526",
@@ -105445,7 +105445,7 @@
         "mttr_horas": 28038.2,
         "motivo_falla": "9. NO HACE PARTE DE LA OPERACION",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sitio bajo revisión de metas MinTic"
+        "STOPPER": "Traslado Implementación"
     },
     {
         "ID": "30452",
