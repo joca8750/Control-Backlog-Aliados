@@ -12,30 +12,27 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1rem; margin: 5px 0; font-weight: 700; }
-        h2 { color: var(--rojo); font-size: 0.75rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
+        h2 { color: var(--rojo); font-size: 0.72rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
 
-        /* BARRA DE HERRAMIENTAS */
-        .toolbar { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 100px; }
+        .toolbar { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 90px; }
         label { font-size: 0.55rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
         select { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.7rem; background: #fff; height: 30px; cursor: pointer; }
 
         .btn-container { display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 5px; }
         .btn { padding: 6px 15px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.6rem; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 5px; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* KPI COMPACTOS */
         .resumen-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
         .card { background: white; padding: 6px 4px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .card h3 { color: #888; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
-        /* GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .chart-box { height: 220px; position: relative; }
 
-        /* TABLA */
         .table-wrapper { overflow-x: auto; max-height: 450px; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 10px 6px; text-align: left; font-size: 0.65rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
@@ -91,8 +88,8 @@
                     <thead><tr>
                         <th style="width:75px">ID</th>
                         <th style="width:110px">ALIADO</th>
-                        <th style="width:65px; text-align:right; color:var(--rojo);">DÍAS</th>
-                        <th style="width:70px; text-align:right; color:var(--azul);">HORAS</th>
+                        <th style="width:65px; text-align:right;">DÍAS</th>
+                        <th style="width:70px; text-align:right;">HORAS</th>
                         <th style="width:180px">STOPPER / GESTIÓN</th>
                         <th style="width:100px">OT</th>
                         <th>DETALLE PERFIL VELOCIDAD</th>
@@ -118,18 +115,31 @@
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
+        // Función corregida: Guardamos el estado ANTES de cambiar los filtros
         function registrarEstado() {
-            const estado = { filtros: {}, selectedId, currentEstadoFilter };
-            for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
+            const estado = { 
+                filtros: {}, 
+                selectedId: selectedId, 
+                currentEstadoFilter: currentEstadoFilter 
+            };
+            for (let id in filtrosIds) {
+                estado.filtros[id] = document.getElementById(id).value;
+            }
             historial.push(JSON.stringify(estado));
             document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() { currentEstadoFilter = null; selectedId = null; registrarEstado(); aplicarCambios(false); }
+        function registrarYFiltrar() { 
+            registrarEstado(); // Guardamos como estaba antes
+            currentEstadoFilter = null; 
+            selectedId = null; 
+            aplicarCambios(false); 
+        }
 
         function aplicarCambios(conReg = true) {
             if (conReg) registrarEstado();
             const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
+            
             let filtered = dataFull.filter(i => {
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
@@ -160,7 +170,7 @@
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onmouseenter = (e) => showTooltip(e, s); tr.onmouseleave = hideTooltip;
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right; font-weight:700; color:var(--rojo);">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right; color:var(--azul);">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right; font-weight:700;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
             document.getElementById('table-title').innerText = currentEstadoFilter ? `ESTADO: ${currentEstadoFilter} (${nF})` : `Backlog Activo (${nF})`;
@@ -177,9 +187,9 @@
                     plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } }},
                     onClick: (e, el) => {
                         if (el.length > 0) {
+                            registrarEstado(); // Guardamos antes de filtrar por la gráfica
                             const index = el[0].index;
                             currentEstadoFilter = chartEstado.data.labels[index];
-                            registrarEstado();
                             aplicarCambios(false);
                         }
                     }
@@ -189,16 +199,27 @@
 
         function buscarPorID() {
             const id = prompt("Ingrese ID:");
-            if (id) { const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { registrarEstado(); selectedId = s.ID; aplicarCambios(false); } }
+            if (id) { registrarEstado(); const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { selectedId = s.ID; aplicarCambios(false); } }
         }
 
         function pasoAtras() {
             if (historial.length > 0) {
                 const u = JSON.parse(historial.pop());
-                for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
-                selectedId = u.selectedId; currentEstadoFilter = u.currentEstadoFilter;
+                // Restauramos selectores
+                for (let id in u.filtros) {
+                    document.getElementById(id).value = u.filtros[id];
+                }
+                // Restauramos variables de filtro
+                selectedId = u.selectedId;
+                currentEstadoFilter = u.currentEstadoFilter;
+                
+                // Aplicamos los cambios sin registrar este paso en el historial
                 aplicarCambios(false);
-                if (historial.length === 0) document.getElementById('btn-return').disabled = true;
+                
+                // Si el historial queda vacío, desactivamos el botón
+                if (historial.length === 0) {
+                    document.getElementById('btn-return').disabled = true;
+                }
             }
         }
 
@@ -215,7 +236,7 @@
             }
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Estado_Filtrado.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_General.xlsx"); }
         init();
     </script>
 </body>
