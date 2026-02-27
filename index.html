@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Gestión Técnica</title>
+    <title>Backlog Regional - Vista Profesional</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -23,51 +23,62 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
 
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.25rem; margin: 10px 0; letter-spacing: 1px; font-weight: 700; }
-        h2 { color: var(--rojo); font-size: 0.85rem; margin: 0 0 10px 0; text-transform: uppercase; text-align: center; font-weight: 500; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1.1rem; margin: 8px 0; letter-spacing: 1px; font-weight: 700; }
+        
+        /* TÍTULOS DE GRÁFICAS Y TABLA CENTRADOS */
+        h2 { 
+            color: var(--rojo); 
+            font-size: 0.8rem; 
+            margin: 0 0 10px 0; 
+            text-transform: uppercase; 
+            text-align: center; /* Centrado del título */
+            font-weight: 700;
+            width: 100%;
+        }
 
         /* TOOLBAR */
         .toolbar { 
-            background: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; 
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+            background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
         }
 
-        .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 110px; }
-        label { font-size: 0.6rem; color: #b2bec3; text-transform: uppercase; font-weight: 700; padding-left: 4px; }
+        .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 100px; }
+        label { font-size: 0.55rem; color: #b2bec3; text-transform: uppercase; font-weight: 700; padding-left: 4px; }
         
         select { 
-            padding: 6px 10px; border-radius: 8px; border: 1px solid var(--borde); font-size: 0.75rem; background: #fff; height: 36px; cursor: pointer;
-            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
-            background-repeat: no-repeat; background-position: right 10px center; transition: 0.3s;
+            padding: 4px 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.7rem; background: #fff; height: 30px; cursor: pointer;
+            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat; background-position: right 8px center; transition: 0.3s;
         }
-        select:hover { border-color: var(--rojo); }
 
-        .btn-container { display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
-        .btn { padding: 9px 18px; border-radius: 8px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; transition: 0.3s; }
+        .btn-container { display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
+        .btn { padding: 7px 14px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: 0.3s; }
         
         .btn-excel { background: var(--verde-excel); }
         .btn-search { background: var(--azul-search); }
         .btn-return { background: var(--azul-return); }
-        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* KPIs */
-        .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
-        .card { background: white; padding: 8px; border-radius: 10px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-        .card h3 { color: #888; font-size: 0.6rem; margin: 0; text-transform: uppercase; }
-        .card p { font-size: 1.25rem; color: var(--rojo); margin: 4px 0; font-weight: 700; }
+        .resumen-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 10px; }
+        .card { background: white; padding: 6px; border-radius: 8px; border-top: 2px solid var(--rojo); text-align: center; }
+        .card h3 { color: #888; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
+        .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
         /* GRID PRINCIPAL */
-        .dashboard-grid { display: flex; flex-direction: column; gap: 15px; }
-        .chart-container, .tabla-critica { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; }
-        .chart-box { height: 260px; position: relative; }
+        .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
+        .chart-container, .tabla-critica { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; }
+        .chart-box { height: 240px; position: relative; }
 
-        /* TABLA DE DATOS */
-        .table-wrapper { overflow-x: auto; max-height: 450px; border-radius: 8px; overflow-y: auto; border: 1px solid #f0f0f0; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 12px 8px; text-align: left; font-size: 0.65rem; color: #999; position: sticky; top: 0; background: white; z-index: 10; text-transform: uppercase; }
-        td { padding: 12px 8px; border-bottom: 1px solid #f1f2f6; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* TABLA DE DATOS COMPACTA */
+        .table-wrapper { overflow-x: auto; max-height: 420px; border-radius: 6px; overflow-y: auto; border: 1px solid #f0f0f0; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
+        
+        th { border-bottom: 2px solid var(--rojo); padding: 8px 4px; text-align: left; font-size: 0.6rem; color: #999; position: sticky; top: 0; background: white; z-index: 10; text-transform: uppercase; }
+        
+        /* FUENTE PEQUEÑA PARA AJUSTAR A LA VISUAL */
+        td { padding: 6px 4px; border-bottom: 1px solid #f1f2f6; font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #f8f9fa; cursor: pointer; }
@@ -75,17 +86,17 @@
         /* TOOLTIP TÉCNICO */
         #tooltip-stopper {
             position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 10px;
-            padding: 15px; box-shadow: 0 12px 30px rgba(0,0,0,0.2); z-index: 10000; max-width: 400px;
-            pointer-events: none; font-size: 0.85rem; color: #333; line-height: 1.4;
+            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 380px;
+            pointer-events: none; font-size: 0.8rem; color: #333; line-height: 1.4;
         }
-        .tt-section { margin-bottom: 8px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
-        .tt-label { font-size: 0.6rem; color: #999; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 2px; }
+        .tt-section { margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px; }
+        .tt-label { font-size: 0.55rem; color: #999; text-transform: uppercase; font-weight: 800; display: block; }
         .tt-value { color: #2d3436; font-weight: 600; }
 
         @media (min-width: 1024px) {
-            body { padding: 15px 25px; height: 100vh; overflow: hidden; }
+            body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 2.4fr; height: calc(100vh - 240px); align-items: start; gap: 20px; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.1fr 2.4fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
             .btn-container { width: auto; margin-top: 0; }
         }
     </style>
@@ -119,17 +130,17 @@
 
     <div class="dashboard-grid">
         <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
+        <div class="chart-container"><h2>Afectación</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
             <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr>
-                        <th style="width:75px">ID</th>
-                        <th style="width:110px">ALIADO</th>
-                        <th style="width:65px; text-align:right;">DÍAS</th>
+                        <th style="width:70px">ID</th>
+                        <th style="width:100px">ALIADO</th>
+                        <th style="width:55px; text-align:right;">DÍAS</th>
                         <th style="width:180px">STOPPER / GESTIÓN</th>
-                        <th style="width:100px">OT REL.</th>
+                        <th style="width:90px">OT REL.</th>
                         <th>DETALLE PERFIL VELOCIDAD</th>
                     </tr></thead>
                     <tbody id="b-tabla"></tbody>
@@ -146,7 +157,6 @@
             try { const res = await fetch('data_ben.json'); dataFull = await res.json(); actualizarSelectores(); aplicarCambios(false); } catch (e) { console.error(e); }
         }
 
-        // TOOLTIP DINÁMICO CON CAMPOS NUEVOS
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
             tt.innerHTML = `
@@ -154,12 +164,11 @@
                 <div class="tt-section"><span class="tt-label">Gestión Stopper:</span><div class="tt-value">${item.STOPPER || "SIN STOPPER"}</div></div>
                 <div class="tt-section"><span class="tt-label">OT Relacionada:</span><div class="tt-value">${item.OT_REL || "SIN OT"}</div></div>
                 <div class="tt-section"><span class="tt-label">Perfil de Velocidad:</span><div class="tt-value">${item.PERFIL || "N/A"}</div></div>
-                <div style="font-size: 0.7rem; color: #999; margin-top:5px;"><b>Motivo:</b> ${item.motivo_falla}</div>
             `;
             tt.style.display = 'block';
             let x = e.clientX + 20; let y = e.clientY + 20;
-            if (x + 400 > window.innerWidth) x = e.clientX - 410;
-            if (y + 250 > window.innerHeight) y = e.clientY - 230;
+            if (x + 380 > window.innerWidth) x = e.clientX - 390;
+            if (y + 220 > window.innerHeight) y = e.clientY - 230;
             tt.style.left = x + 'px'; tt.style.top = y + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
@@ -168,7 +177,7 @@
             const id = prompt("Ingrese el ID del sitio:");
             if (!id) return;
             const s = dataFull.find(i => String(i.ID) === id.trim());
-            if (s) { registrarEstado(); seleccionarSitio(s.ID); } else { alert("ID no encontrado en la base actual."); }
+            if (s) { registrarEstado(); seleccionarSitio(s.ID); } else { alert("ID no encontrado"); }
         }
 
         function registrarEstado() {
@@ -266,13 +275,13 @@
                 tr.innerHTML = `
                     <td>${s.ID}</td><td>${s.ALIADO}</td>
                     <td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td>
-                    <td style="color:#555;">${s.STOPPER || "SIN STOPPER"}</td>
+                    <td>${s.STOPPER || "SIN STOPPER"}</td>
                     <td>${s.OT_REL || "SIN OT"}</td>
                     <td style="color:#888; font-style:italic;">${s.PERFIL || "N/A"}</td>
                 `;
                 tb.appendChild(tr);
             });
-            document.getElementById('table-title').innerText = selectedId ? `Filtro Activo ID: ${selectedId}` : `Backlog Activo (${nF} sitios)`;
+            document.getElementById('table-title').innerText = selectedId ? `Filtro Activo ID: ${selectedId}` : `Backlog Activo (${nF})`;
             actCharts(mC, r_d);
         }
 
