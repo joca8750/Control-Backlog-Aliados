@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Backlog Regional - Dashboard Final</title>
+    <title>Backlog Regional</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,13 +12,12 @@
     <style>
         :root { 
             --rojo: #D32F2F; 
-            --rojo-dark: #B71C1C;
             --gris-fondo: #F4F7F6; 
             --texto: #212121; 
             --borde: #E0E0E0;
             --azul-return: #2c3e50;
             --azul-search: #1976D2;
-            --hover-selector: #FFEBEE;
+            --verde-excel: #2e7d32;
         }
 
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
@@ -39,15 +38,14 @@
         
         select { 
             padding: 5px 8px; border-radius: 6px; border: 1px solid var(--borde); font-size: 0.75rem; background: #fff; width: 100%; height: 32px; cursor: pointer;
-            transition: all 0.2s ease; outline: none; appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
+            appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>');
             background-repeat: no-repeat; background-position: right 8px center;
         }
 
         .btn-container { display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
-        .btn { padding: 8px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: all 0.2s; }
+        .btn { padding: 8px 15px; border-radius: 6px; border: none; color: white; text-transform: uppercase; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 700; transition: 0.2s; }
         
-        .btn-excel { background: #2e7d32; }
+        .btn-excel { background: var(--verde-excel); }
         .btn-search { background: var(--azul-search); }
         .btn-return { background: var(--azul-return); }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -58,41 +56,32 @@
         .card h3 { color: #777; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1.1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
-        /* DASHBOARD GRID */
+        /* GRID PRINCIPAL */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); width: 100%; }
         .chart-box { height: 260px; position: relative; }
 
-        /* TABLA */
+        /* TABLA DINÁMICA */
         .table-wrapper { overflow-x: auto; max-height: 400px; border: 1px solid #f0f0f0; border-radius: 4px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 8px 6px; text-align: left; font-size: 0.65rem; color: #888; position: sticky; top: 0; background: white; z-index: 10; font-weight: 700; }
         td { padding: 8px 6px; border-bottom: 1px solid #f5f5f5; font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); border-left: 4px solid var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #fafafa; cursor: pointer; }
 
-        /* TOOLTIP STOPPER PROFESIONAL */
+        /* TOOLTIP STOPPER */
         #tooltip-stopper {
-            position: fixed; 
-            display: none; 
-            background: white; 
-            border: 2px solid var(--rojo); 
-            border-radius: 8px;
-            padding: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-            z-index: 10000; 
-            max-width: 350px;
-            pointer-events: none; 
-            font-size: 0.85rem; 
-            color: #333;
+            position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 8px;
+            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 350px;
+            pointer-events: none; font-size: 0.85rem; color: #333; line-height: 1.3;
         }
         #tooltip-stopper b { color: var(--rojo); display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; }
 
         @media (min-width: 1024px) {
             body { padding: 10px 20px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1.1fr 1.3fr 1.6fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.8fr; height: calc(100vh - 220px); align-items: start; gap: 15px; }
             .btn-container { width: auto; margin-top: 0; }
         }
     </style>
@@ -127,13 +116,19 @@
     </div>
 
     <div class="dashboard-grid">
-        <div class="chart-container"><h2>Distribución</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
-        <div class="chart-container"><h2>Afectación x Días</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
+        <div class="chart-container"><h2>Distribución Fallas</h2><div class="chart-box"><canvas id="cFallas"></canvas></div></div>
+        <div class="chart-container"><h2>Afectación x Tiempo</h2><div class="chart-box"><canvas id="cAfectacionDias"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Backlog Activo (≥ 1 Día)</h2>
+            <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th style="width:25%">ID SITIO</th><th style="width:35%">ALIADO</th><th style="text-align:right">DÍAS</th><th style="text-align:right">HORAS</th></tr></thead>
+                    <thead><tr>
+                        <th style="width:70px">ID</th>
+                        <th style="width:100px">ALIADO</th>
+                        <th style="width:60px; text-align:right;">DÍAS</th>
+                        <th style="width:70px; text-align:right;">HORAS</th>
+                        <th>STOPPER</th>
+                    </tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -141,214 +136,155 @@
     </div>
 
     <script>
-        let dataFull = [];
-        let chart1, chartAfectacion;
-        let selectedId = null;
-        let historial = [];
-        let currentDayFilter = null;
-
+        let dataFull = []; let chart1, chartAfectacion; let selectedId = null; let historial = []; let currentDayFilter = null;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO', 'f-causa': 'motivo_falla'};
-        const coloresPaleta = ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00', '#00838F', '#4E342E', '#558B2F', '#37474F'];
 
         async function init() {
-            try {
-                const res = await fetch('data_ben.json');
-                dataFull = await res.json();
-                actualizarSelectores();
-                aplicarCambios(false);
-            } catch (e) { console.error("Error cargando JSON:", e); }
+            try { const res = await fetch('data_ben.json'); dataFull = await res.json(); actualizarSelectores(); aplicarCambios(false); } catch (e) { console.error(e); }
         }
 
-        // --- FUNCIÓN TOOLTIP ACTUALIZADA PARA MOSTRAR STOPPER REAL ---
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
-            // Captura el Stopper directamente del JSON para cada sitio
-            const textoStopper = item.STOPPER || item.stopper || "Información en proceso...";
-            
-            tt.innerHTML = `
-                <div style="border-bottom: 1px solid #eee; margin-bottom: 8px; padding-bottom: 4px;">
-                    <b style="color:var(--rojo); font-size: 0.7rem;">STOPPER DETECTADO - ID: ${item.ID}</b>
-                </div>
-                <div style="font-size: 0.9rem; font-weight: 500; color: #333; line-height: 1.3;">
-                    ${textoStopper}
-                </div>
-                <div style="margin-top: 8px; font-size: 0.65rem; color: #888;">
-                    <b>Municipio:</b> ${item.MUNICIPIO || 'N/A'} | <b>Aliado:</b> ${item.ALIADO}
-                </div>
-            `;
-            
+            const stopperTxt = item.STOPPER || "SIN STOPPER";
+            tt.innerHTML = `<b>GESTIÓN - ID: ${item.ID}</b><div style="font-size:0.95rem; font-weight:600;">${stopperTxt}</div><div style="margin-top:5px; font-size:0.7rem; color:gray;">Municipio: ${item.MUNICIPIO}</div>`;
             tt.style.display = 'block';
             let x = e.clientX + 20; let y = e.clientY + 20;
             if (x + 350 > window.innerWidth) x = e.clientX - 360;
-            if (y + 180 > window.innerHeight) y = e.clientY - 180;
+            if (y + 150 > window.innerHeight) y = e.clientY - 150;
             tt.style.left = x + 'px'; tt.style.top = y + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
         function buscarPorID() {
-            const idBusca = prompt("Ingrese el ID del sitio a buscar:");
+            const idBusca = prompt("Ingrese el ID del sitio:");
             if (!idBusca) return;
-            const sitioEncontrado = dataFull.find(i => String(i.ID) === String(idBusca).trim());
-            if (sitioEncontrado) {
-                registrarEstado(); 
-                seleccionarSitio(sitioEncontrado.ID);
-            } else { alert("ID no encontrado."); }
+            const s = dataFull.find(i => String(i.ID) === idBusca.trim());
+            if (s) { registrarEstado(); seleccionarSitio(s.ID); } else { alert("ID no encontrado"); }
         }
 
         function registrarEstado() {
-            const estado = { filtros: {}, selectedId: selectedId, currentDayFilter: currentDayFilter };
-            for (let id in filtrosIds) { estado.filtros[id] = document.getElementById(id).value; }
+            const estado = { filtros: {}, selectedId, currentDayFilter };
+            for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
             historial.push(JSON.stringify(estado));
             document.getElementById('btn-return').disabled = false;
         }
 
         function registrarYFiltrar() { currentDayFilter = null; selectedId = null; registrarEstado(); aplicarCambios(false); }
-        function filtrarPorRangoDias(rango) { selectedId = null; registrarEstado(); currentDayFilter = rango; aplicarCambios(false); }
+        function filtrarPorRangoDias(r) { selectedId = null; registrarEstado(); currentDayFilter = r; aplicarCambios(false); }
 
-        function aplicarCambios(conRegistro = true) {
-            if (conRegistro) registrarEstado();
-            const selecciones = {};
-            for (let id in filtrosIds) { selecciones[filtrosIds[id]] = document.getElementById(id).value || 'todos'; }
+        function aplicarCambios(conReg = true) {
+            if (conReg) registrarEstado();
+            const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
             
-            let filtrados = dataFull.filter(item => {
-                const matchFiltros = (selecciones.REGIONAL === 'todos' || item.REGIONAL === selecciones.REGIONAL) &&
-                       (selecciones.DEPARTAMENTO === 'todos' || item.DEPARTAMENTO === selecciones.DEPARTAMENTO) &&
-                       (selecciones.ALIADO === 'todos' || item.ALIADO === selecciones.ALIADO) &&
-                       (selecciones.TOPOLOGIA === 'todos' || item.TOPOLOGIA === selecciones.TOPOLOGIA) &&
-                       (selecciones.PROYECTO === 'todos' || item.PROYECTO === selecciones.PROYECTO) &&
-                       (selecciones.motivo_falla === 'todos' || item.motivo_falla === selecciones.motivo_falla);
+            let filtered = dataFull.filter(i => {
+                if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
+                if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
+                if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
+                if (sel.TOPOLOGIA !== 'todos' && i.TOPOLOGIA !== sel.TOPOLOGIA) return false;
+                if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
+                
+                const d = i.mttr_horas / 24;
+                const isFalla = i.tickets > 0 && d >= 1;
 
-                if (!matchFiltros) return false;
-                const d = item.mttr_horas / 24;
-                if (currentDayFilter) {
-                    if (currentDayFilter === '>60') return d > 60;
-                    if (currentDayFilter === '45-60') return d > 45 && d <= 60;
-                    if (currentDayFilter === '30-45') return d > 30 && d <= 45;
-                    if (currentDayFilter === '15-30') return d > 15 && d <= 30;
-                    if (currentDayFilter === '5-15') return d > 5 && d <= 15;
-                    if (currentDayFilter === '1-5') return d >= 1 && d <= 5;
+                if (sel.motivo_falla !== 'todos' || currentDayFilter) {
+                    if (!isFalla) return false;
+                    if (sel.motivo_falla !== 'todos' && i.motivo_falla !== sel.motivo_falla) return false;
+                    if (currentDayFilter) {
+                        if (currentDayFilter === '>60' && d <= 60) return false;
+                        if (currentDayFilter === '45-60' && (d < 45 || d > 60)) return false;
+                        if (currentDayFilter === '30-45' && (d < 30 || d > 45)) return false;
+                        if (currentDayFilter === '15-30' && (d < 15 || d > 30)) return false;
+                        if (currentDayFilter === '5-15' && (d < 5 || d > 15)) return false;
+                        if (currentDayFilter === '1-5' && (d < 1 || d > 5)) return false;
+                    }
                 }
                 return true;
             });
 
-            if (selectedId) { filtrados = filtrados.filter(i => i.ID == selectedId); }
-            actualizarSelectores();
-            render(filtrados);
+            if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
+            actualizarSelectores(); render(filtered);
         }
 
         function seleccionarSitio(id) {
-            selectedId = id;
-            const s = dataFull.find(i => i.ID == id);
-            if (s) { 
-                for (let key in filtrosIds) { 
-                    const selectEl = document.getElementById(key);
-                    if (![...selectEl.options].some(o => o.value === s[filtrosIds[key]])) {
-                        selectEl.add(new Option(s[filtrosIds[key]], s[filtrosIds[key]]));
-                    }
-                    selectEl.value = s[filtrosIds[key]]; 
-                } 
-            }
+            selectedId = id; const s = dataFull.find(i => i.ID == id);
+            if (s) { for (let k in filtrosIds) { document.getElementById(k).value = s[filtrosIds[k]]; } }
             aplicarCambios(false);
             if(window.innerWidth < 1024) window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function pasoAtras() {
             if (historial.length === 0) return;
-            const ultimo = JSON.parse(historial.pop());
-            for (let id in ultimo.filtros) { document.getElementById(id).value = ultimo.filtros[id]; }
-            selectedId = ultimo.selectedId;
-            currentDayFilter = ultimo.currentDayFilter;
+            const u = JSON.parse(historial.pop());
+            for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
+            selectedId = u.selectedId; currentDayFilter = u.currentDayFilter;
             actualizarSelectores(); aplicarCambios(false);
             if (historial.length === 0) document.getElementById('btn-return').disabled = true;
         }
 
         function actualizarSelectores() {
-            const actuales = {};
-            for (let id in filtrosIds) { actuales[id] = document.getElementById(id).value || 'todos'; }
-            for (let idTarget in filtrosIds) {
-                const unicos = [...new Set(dataFull.filter(item => {
-                    for (let idSource in filtrosIds) {
-                        if (idSource === idTarget) continue;
-                        if (actuales[idSource] !== 'todos' && item[filtrosIds[idSource]] !== actuales[idSource]) return false;
-                    }
+            const act = {}; for (let id in filtrosIds) act[id] = document.getElementById(id).value;
+            for (let target in filtrosIds) {
+                const unicos = [...new Set(dataFull.filter(i => {
+                    for (let s in filtrosIds) { if (s !== target && act[s] !== 'todos' && i[filtrosIds[s]] !== act[s]) return false; }
                     return true;
-                }).map(i => i[filtrosIds[idTarget]]))].filter(v => v && v !== "N/A").sort();
-                const el = document.getElementById(idTarget);
-                const valPrev = actuales[idTarget];
+                }).map(i => i[filtrosIds[target]]))].filter(v => v && v !== "N/A").sort();
+                const el = document.getElementById(target); const prev = act[target];
                 el.innerHTML = '<option value="todos">Todos</option>';
-                unicos.forEach(v => el.add(new Option(v, v)));
-                if (unicos.includes(valPrev)) el.value = valPrev;
+                unicos.forEach(v => el.add(new Option(v, v))); if (unicos.includes(prev)) el.value = prev;
             }
         }
 
         function render(data) {
-            const sorted = data.sort((a, b) => (parseFloat(b.mttr_horas) || 0) - (parseFloat(a.mttr_horas) || 0));
+            const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
             let sD = 0, sH = 0, nF = 0, mC = {};
-            let r_dias = { '>60': 0, '45-60': 0, '30-45': 0, '15-30': 0, '5-15': 0, '1-5': 0 };
+            let r_d = { '>60': 0, '45-60': 0, '30-45': 0, '15-30': 0, '5-15': 0, '1-5': 0 };
 
             sorted.forEach(s => {
-                sD += s.disponibilidad; 
-                const d = s.mttr_horas / 24;
+                sD += s.disponibilidad; const d = s.mttr_horas / 24;
                 if (s.tickets > 0 && d >= 1) {
-                    nF++; sH += s.mttr_horas;
-                    mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1;
-                    if (d > 60) r_dias['>60']++; else if (d > 45) r_dias['45-60']++; else if (d > 30) r_dias['30-45']++; else if (d > 15) r_dias['15-30']++; else if (d > 5) r_dias['5-15']++; else r_dias['1-5']++;
+                    nF++; sH += s.mttr_horas; mC[s.motivo_falla] = (mC[s.motivo_falla] || 0) + 1;
+                    if (d > 60) r_d['>60']++; else if (d > 45) r_d['45-60']++; else if (d > 30) r_d['30-45']++; else if (d > 15) r_d['15-30']++; else if (d > 5) r_d['5-15']++; else r_d['1-5']++;
                 }
             });
 
-            document.getElementById('t-sitios').innerText = data.length; 
+            document.getElementById('t-sitios').innerText = data.length;
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(1) + "%";
             document.getElementById('t-falla').innerText = nF;
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(1) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
-            const tbody = document.getElementById('b-tabla');
-            tbody.innerHTML = "";
-            const listaFiltrada = sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1);
-            listaFiltrada.forEach(s => {
-                const tr = document.createElement('tr');
-                if (s.ID == selectedId) tr.className = 'selected';
-                tr.onmouseenter = (e) => showTooltip(e, s);
-                tr.onmousemove = (e) => showTooltip(e, s);
-                tr.onmouseleave = () => hideTooltip();
+            const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
+            sorted.filter(s => s.tickets > 0 && (s.mttr_horas/24) >= 1).forEach(s => {
+                const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
+                tr.onmouseenter = (e) => showTooltip(e, s); tr.onmousemove = (e) => showTooltip(e, s); tr.onmouseleave = hideTooltip;
                 tr.onclick = () => { hideTooltip(); registrarEstado(); seleccionarSitio(s.ID); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="color:var(--rojo);text-align:right;font-weight:bold;">${s.mttr_horas.toFixed(1)}h</td>`;
-                tbody.appendChild(tr);
+                const st = s.STOPPER || "SIN STOPPER";
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td style="text-align:right; font-weight:bold; color:var(--rojo)">${s.mttr_horas.toFixed(1)}h</td><td style="color:#666; font-style:italic">${st}</td>`;
+                tb.appendChild(tr);
             });
-            document.getElementById('table-title').innerText = selectedId ? `Detalle Sitio: ${selectedId}` : `Backlog Activo (${nF} sitios)`;
-            actualizarGraficas(mC, r_dias);
+            document.getElementById('table-title').innerText = selectedId ? `Detalle Sitio: ${selectedId}` : `Backlog Activo (${nF})`;
+            actCharts(mC, r_d);
         }
 
-        function actualizarGraficas(causas, r_dias) {
+        function actCharts(causas, r_d) {
             if(chart1) chart1.destroy(); if(chartAfectacion) chartAfectacion.destroy();
             const isMob = window.innerWidth < 1024;
             chart1 = new Chart(document.getElementById('cFallas'), {
-                type: 'doughnut', 
-                data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: coloresPaleta, borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } },
-                onClick: (e, item) => { registrarEstado(); document.getElementById('f-causa').value = item.text; aplicarCambios(false); }
-                }},
-                onClick: (e, el) => { if(el.length > 0) { registrarEstado(); document.getElementById('f-causa').value = Object.keys(causas)[el[0].index]; aplicarCambios(false); }}}
+                type: 'doughnut', data: { labels: Object.keys(causas), datasets: [{ data: Object.values(causas), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } }, onClick: (e, it) => { registrarEstado(); document.getElementById('f-causa').value = it.text; aplicarCambios(false); } }}}
             });
-            const claves = ['>60', '45-60', '30-45', '15-30', '5-15', '1-5'];
             chartAfectacion = new Chart(document.getElementById('cAfectacionDias'), {
-                type: 'bar', 
-                data: { labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
-                datasets: [{ data: [r_dias['>60'], r_dias['45-60'], r_dias['30-45'], r_dias['15-30'], r_dias['5-15'], r_dias['1-5']], 
-                backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] },
-                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
-                scales: { y: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }, x: { beginAtZero: true, grid: { color: '#eee' } } },
-                onClick: (e, el) => {
-                    if (el.length > 0) { filtrarPorRangoDias(claves[el[0].index]); }
-                    else {
-                        const yAxis = chartAfectacion.scales.y;
-                        const index = yAxis.getValueForPixel(e.y);
-                        if (index >= 0 && index < claves.length) { filtrarPorRangoDias(claves[index]); }
-                    }
-                }}
+                type: 'bar', data: { labels: ['>60 Días', '45-60 Días', '30-45 Días', '15-30 Días', '5-15 Días', '1-5 Días'], 
+                datasets: [{ data: [r_d['>60'], r_d['45-60'], r_d['30-45'], r_d['15-30'], r_d['5-15'], r_d['1-5']], backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 5 }] },
+                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, onClick: (e, el) => { if(el.length > 0) filtrarPorRangoDias(['>60', '45-60', '30-45', '15-30', '5-15', '1-5'][el[0].index]); }}
             });
         }
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Backlog_Regional.xlsx"); }
+
+        function exportarExcel() { 
+            const tabla = document.getElementById('tSitios');
+            const wb = XLSX.utils.table_to_book(tabla, {sheet: "Backlog"});
+            XLSX.writeFile(wb, "Reporte_Backlog_Regional.xlsx"); 
+        }
         init();
     </script>
 </body>
