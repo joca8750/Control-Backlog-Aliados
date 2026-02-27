@@ -3,51 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - DIAS X CD</title>
+    <title>Dashboard Regional - Backlog</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --rojo: #D32F2F; --gris-fondo: #F4F7F6; --texto: #212121; --borde: #dfe6e9; --azul: #1976D2; --verde: #2e7d32; }
+        :root { --rojo: #D32F2F; --gris: #F4F7F6; --texto: #212121; --azul: #1976D2; --verde: #2e7d32; }
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
-        body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
-        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1rem; margin: 5px 0; font-weight: 700; }
+        body { background: var(--gris); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
+        h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1rem; margin: 5px 0; }
         h2 { color: var(--rojo); font-size: 0.72rem; margin: 0 0 5px 0; text-transform: uppercase; text-align: center; font-weight: 700; width: 100%; }
 
-        /* BARRA DE HERRAMIENTAS */
         .toolbar { background: white; padding: 8px; border-radius: 8px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 90px; }
-        label { font-size: 0.5rem; color: #999; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
-        select { padding: 2px 6px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.65rem; background: #fff; height: 26px; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"><path fill="%23D32F2F" d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 6px center; }
+        label { font-size: 0.5rem; color: #999; text-transform: uppercase; font-weight: 700; }
+        select { padding: 2px 6px; border-radius: 4px; border: 1px solid #dfe6e9; font-size: 0.65rem; height: 26px; }
 
         .btn-container { display: flex; gap: 4px; width: 100%; justify-content: center; margin-top: 4px; }
-        .btn { padding: 5px 12px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.55rem; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 4px; }
-        .btn-excel { background: var(--verde); }
-        .btn-search { background: var(--azul); }
-        .btn-return { background: #34495e; }
+        .btn { padding: 5px 12px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.55rem; cursor: pointer; font-weight: 700; }
+        .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
 
-        /* KPI COMPACTOS */
         .resumen-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; }
-        .card { background: white; padding: 4px 2px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .card h3 { color: #888; font-size: 0.5rem; margin: 0; text-transform: uppercase; }
+        .card { background: white; padding: 4px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; }
         .card p { font-size: 0.9rem; color: var(--rojo); margin: 1px 0; font-weight: 700; }
 
-        /* GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 10px; }
         .chart-container, .tabla-critica { background: white; padding: 8px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
         .chart-box { height: 180px; position: relative; }
 
-        /* TABLA COMPACTA */
-        .table-wrapper { overflow-x: auto; max-height: 380px; border-radius: 6px; overflow-y: auto; border: 1px solid #f0f0f0; }
+        .table-wrapper { overflow-x: auto; max-height: 380px; border-radius: 6px; border: 1px solid #f0f0f0; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 6px 4px; text-align: left; font-size: 0.55rem; color: #999; position: sticky; top: 0; background: white; z-index: 10; }
+        th { border-bottom: 2px solid var(--rojo); padding: 6px 4px; text-align: left; font-size: 0.55rem; color: #999; position: sticky; top: 0; background: white; }
         td { padding: 4px 4px; border-bottom: 1px solid #f1f2f6; font-size: 0.6rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
-        tr:hover td { background-color: #f8f9fa; cursor: pointer; }
 
-        #tooltip-stopper { position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 8px; padding: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; max-width: 350px; pointer-events: none; font-size: 0.75rem; line-height: 1.3; }
-        .tt-label { font-size: 0.5rem; color: #999; text-transform: uppercase; font-weight: 800; display: block; margin-top: 3px; }
+        #tooltip-stopper { position: fixed; display: none; background: white; border: 2px solid var(--rojo); border-radius: 8px; padding: 10px; z-index: 10000; max-width: 350px; pointer-events: none; font-size: 0.75rem; line-height: 1.3; }
 
         @media (min-width: 1024px) {
             body { padding: 10px 15px; height: 100vh; overflow: hidden; }
@@ -85,9 +75,9 @@
 
     <div class="dashboard-grid">
         <div class="chart-container"><h2>ESTADO CD</h2><div class="chart-box"><canvas id="cEstadoOp"></canvas></div></div>
-        <div class="chart-container"><h2>DIAS X CD</h2><div class="chart-box"><canvas id="cRangoOT"></canvas></div></div>
+        <div class="chart-container"><h2>Rango Vigencia OT</h2><div class="chart-box"><canvas id="cRangoOT"></canvas></div></div>
         <div class="tabla-critica">
-            <h2 id="table-title">Cargando...</h2>
+            <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr>
@@ -114,26 +104,16 @@
 
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
-            tt.innerHTML = `
-                <b style="color:var(--rojo); border-bottom: 1px solid var(--rojo); display:block; padding-bottom:4px; margin-bottom:6px; font-size:0.7rem;">ID: ${item.ID} | ${item.MUNICIPIO}</b>
-                <span class="tt-label">ESTADO CD:</span><b>${item.ESTADO_OP || "N/A"}</b>
-                <span class="tt-label">VIGENCIA:</span><b>${item.RANGO_OT || "SIN RANGO"}</b>
-                <span class="tt-label">STOPPER:</span><b>${item.STOPPER || "SIN STOPPER"}</b>
-                <span class="tt-label">PERFIL:</span><b>${item.PERFIL || "N/A"}</b>
-            `;
-            tt.style.display = 'block';
-            let x = e.clientX + 15; let y = e.clientY + 15;
-            if (x + 350 > window.innerWidth) x = e.clientX - 360;
-            if (y + 180 > window.innerHeight) y = e.clientY - 190;
-            tt.style.left = x + 'px'; tt.style.top = y + 'px';
+            tt.innerHTML = `<b style="color:var(--rojo); border-bottom:1px solid var(--rojo); display:block; margin-bottom:5px;">ID: ${item.ID}</b>
+                ESTADO CD: <b>${item.ESTADO_OP}</b><br>RANGO: <b>${item.RANGO_OT}</b><br>GESTIÓN: <b>${item.STOPPER}</b>`;
+            tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
         function registrarEstado() {
             const estado = { filtros: {}, selectedId, currentRangeFilter };
             for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
-            historial.push(JSON.stringify(estado));
-            document.getElementById('btn-return').disabled = false;
+            historial.push(JSON.stringify(estado)); document.getElementById('btn-return').disabled = false;
         }
 
         function registrarYFiltrar() { currentRangeFilter = null; selectedId = null; registrarEstado(); aplicarCambios(false); }
@@ -145,30 +125,22 @@
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
                 if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
-                if (sel.TOPOLOGIA !== 'todos' && i.TOPOLOGIA !== sel.TOPOLOGIA) return false;
-                if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
-                if (sel.motivo_falla !== 'todos' && i.motivo_falla !== sel.motivo_falla) return false;
                 if (currentRangeFilter && i.RANGO_OT !== currentRangeFilter) return false;
-                return true;
+                return i.tickets > 0;
             });
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
             actualizarSelectores(); render(filtered);
         }
 
         function render(data) {
-            const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
             let sD = 0, sH = 0, nF = 0, mE = {};
-            // Rangos exactos que el script de Python genera (limpios)
             let r_ot = { 'MAYOR A 60 DIAS': 0, 'DE 45 A 60 DIAS': 0, 'DE 30 A 45 DIAS': 0, 'DE 15 A 30 DIAS': 0, 'DE 5 A 15 DIAS': 0, 'MENOR A 5 DIAS': 0 };
 
             data.forEach(s => {
-                sD += s.disponibilidad;
-                if (s.tickets > 0) {
-                    nF++; sH += s.mttr_horas;
-                    mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
-                    const r = (s.RANGO_OT || "").toUpperCase().trim();
-                    if (r_ot.hasOwnProperty(r)) r_ot[r]++;
-                }
+                sD += s.disponibilidad; nF++; sH += s.mttr_horas;
+                mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
+                const r = (s.RANGO_OT || "").toUpperCase().trim();
+                if (r_ot.hasOwnProperty(r)) r_ot[r]++;
             });
 
             document.getElementById('t-sitios').innerText = data.length;
@@ -178,11 +150,11 @@
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
-            sorted.filter(s => s.tickets > 0).forEach(s => {
+            data.forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onmouseenter = (e) => showTooltip(e, s); tr.onmouseleave = hideTooltip;
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td>${s.STOPPER || "SIN STOPPER"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}d</td><td>${s.STOPPER}</td><td>${s.OT_REL}</td><td>${s.PERFIL}</td>`;
                 tb.appendChild(tr);
             });
             document.getElementById('table-title').innerText = `Backlog Activo (${nF})`;
@@ -192,36 +164,25 @@
         function actCharts(estados, r_ot) {
             if(chartEstado) chartEstado.destroy(); if(chartOT) chartOT.destroy();
             const isMob = window.innerWidth < 1024;
-            
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'], borderWidth: 0 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 8, font: { size: 7 } } }}}
             });
 
-            // ORDEN SOLICITADO: MAYORES DÍAS A MENORES DÍAS
-            const labelsMap = ['MAYOR A 60 DIAS', 'DE 45 A 60 DIAS', 'DE 30 A 45 DIAS', 'DE 15 A 30 DIAS', 'DE 5 A 15 DIAS', 'MENOR A 5 DIAS'];
-            const labelsVisual = ['> 60 d', '45-60 d', '30-45 d', '15-30 d', '5-15 d', '< 5 d'];
-            const dataValues = labelsMap.map(label => r_ot[label] || 0);
-
+            const keys = ['MAYOR A 60 DIAS', 'DE 45 A 60 DIAS', 'DE 30 A 45 DIAS', 'DE 15 A 30 DIAS', 'DE 5 A 15 DIAS', 'MENOR A 5 DIAS'];
+            const labelsVis = ['> 60 d', '45-60 d', '30-45 d', '15-30 d', '5-15 d', '< 5 d'];
             chartOT = new Chart(document.getElementById('cRangoOT'), {
-                type: 'bar', data: { 
-                    labels: labelsVisual, 
-                    datasets: [{ 
-                        data: dataValues, 
-                        backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 3
-                    }] 
-                },
+                type: 'bar', data: { labels: labelsVis, datasets: [{ data: keys.map(k => r_ot[k]), backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 3 }] },
                 options: { 
                     maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { font: { size: 7, weight: 'bold' } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { font: { size: 8 } } } },
-                    onClick: (e, el) => { if(el.length > 0) { currentRangeFilter = labelsMap[el[0].index]; aplicarCambios(); } }
+                    scales: { x: { ticks: { font: { size: 7, weight: 'bold' } }, grid: { display: false } }, y: { beginAtZero: true } },
+                    onClick: (e, el) => { if(el.length > 0) { currentRangeFilter = keys[el[0].index]; aplicarCambios(); } }
                 }
             });
         }
 
         function buscarPorID() {
-            const id = prompt("Ingrese ID:");
-            if (id) { const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { registrarEstado(); selectedId = s.ID; aplicarCambios(false); } }
+            const id = prompt("ID:"); if (id) { const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { registrarEstado(); selectedId = s.ID; aplicarCambios(false); } }
         }
 
         function pasoAtras() {
@@ -229,8 +190,7 @@
                 const u = JSON.parse(historial.pop());
                 for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
                 selectedId = u.selectedId; currentRangeFilter = u.currentRangeFilter;
-                aplicarCambios(false);
-                if (historial.length === 0) document.getElementById('btn-return').disabled = true;
+                aplicarCambios(false); if (historial.length === 0) document.getElementById('btn-return').disabled = true;
             }
         }
 
@@ -247,7 +207,7 @@
             }
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Vigencia.xlsx"); }
         init();
     </script>
 </body>
