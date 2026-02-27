@@ -4729,7 +4729,7 @@
         "mttr_horas": 230.1,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "27014",
@@ -5807,7 +5807,7 @@
         "mttr_horas": 113.9,
         "motivo_falla": "7. SERVICIO OPERATIVO",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "27280",
@@ -7025,7 +7025,7 @@
         "mttr_horas": 113.4,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "27779",
@@ -13185,7 +13185,7 @@
         "mttr_horas": 213.1,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Postulación a FM"
     },
     {
         "ID": "48917",
@@ -18589,7 +18589,7 @@
         "mttr_horas": 406.6,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "67788",
@@ -27073,7 +27073,7 @@
         "mttr_horas": 35.7,
         "motivo_falla": "7. SERVICIO OPERATIVO",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "54970",
@@ -29117,7 +29117,7 @@
         "mttr_horas": 146.3,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Solares"
     },
     {
         "ID": "73762",
@@ -56977,7 +56977,7 @@
         "mttr_horas": 52.3,
         "motivo_falla": "8. EN DIAGNOSTICO NOC",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Postulación a FM"
+        "STOPPER": "Sin Stopper"
     },
     {
         "ID": "54764",
@@ -57761,7 +57761,7 @@
         "mttr_horas": 169.6,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Administrativo CD"
     },
     {
         "ID": "70262",
@@ -100671,7 +100671,7 @@
         "mttr_horas": 536.1,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Postulación a FM"
+        "STOPPER": "Sin Stopper"
     },
     {
         "ID": "53840",
@@ -100811,7 +100811,7 @@
         "mttr_horas": 278.8,
         "motivo_falla": "1. AFECTACION TOTAL",
         "PROYECTO": "MinTic 7K",
-        "STOPPER": "Sin Stopper"
+        "STOPPER": "Repuestos Satelitales"
     },
     {
         "ID": "53851",
