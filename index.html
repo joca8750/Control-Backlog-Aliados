@@ -114,7 +114,6 @@
 
         async function init() {
             try {
-                // Forzamos n-cache para GitHub Pages
                 const res = await fetch('./data_ben.json?v=' + new Date().getTime());
                 if (!res.ok) throw new Error("Error cargando JSON");
                 dataFull = await res.json();
@@ -142,7 +141,7 @@
                 if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
                 if (currentEstadoFilter && i.ESTADO_OP !== currentEstadoFilter) return false;
                 if (currentDayFilter) {
-                    const d = i.mttr_horas / 24;
+                    const d = i.DIAS_ESTADO || 0; // Usar DIAS_ESTADO para filtro de gráfica
                     if (currentDayFilter === '>60d' && d <= 60) return false;
                     if (currentDayFilter === '45-60d' && (d < 45 || d > 60)) return false;
                     if (currentDayFilter === '30-45d' && (d < 30 || d > 45)) return false;
@@ -158,24 +157,20 @@
         }
 
         function render(data) {
-            // Lógica de Falla: Excluimos explícitamente el SERVICIO OPERATIVO de los cálculos de afectación
             const enFalla = data.filter(s => s.tickets > 0 && s.ESTADO_OP.toUpperCase() !== 'SERVICIO OPERATIVO')
-                                .sort((a, b) => b.mttr_horas - a.mttr_horas);
+                                .sort((a, b) => (b.DIAS_ESTADO || 0) - (a.DIAS_ESTADO || 0));
             
-            let sD = 0, sH = 0, nF = enFalla.length, mE = {};
+            let sD = 0, sH = 0, sDias = 0, nF = enFalla.length, mE = {};
             let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
             
             data.forEach(s => {
                 sD += s.disponibilidad;
-                
-                // Para la dona de ESTADO CD sí contamos todos (incluyendo Operativo)
                 if (s.tickets > 0) {
                     mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
-                    
-                    // Para la gráfica de DÍAS DE AFECTACIÓN excluimos SERVICIO OPERATIVO
                     if (s.ESTADO_OP.toUpperCase() !== 'SERVICIO OPERATIVO') {
                         sH += s.mttr_horas; 
-                        const d = s.mttr_horas / 24;
+                        sDias += (s.DIAS_ESTADO || 0); // Sumar DIAS_ESTADO para promedio
+                        const d = s.DIAS_ESTADO || 0; // Usar DIAS_ESTADO para gráfica
                         if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
                         else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
                     }
@@ -186,14 +181,14 @@
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(0) + "%";
             document.getElementById('t-falla').innerText = nF;
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(0) + "h";
-            document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
+            document.getElementById('d-promedio').innerText = (sDias / (nF || 1)).toFixed(1) + "d";
 
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
-            // Solo mostramos los 500 más críticos en la tabla
             enFalla.slice(0, 500).forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                // Mostrar DIAS_ESTADO directamente en la tabla
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.DIAS_ESTADO || 0).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
             actCharts(mE, rD);
