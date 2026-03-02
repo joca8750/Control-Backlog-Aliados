@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Unificado v3.0</title>
+    <title>Dashboard Regional - Top 500 Críticos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,11 +12,9 @@
         :root { --rojo: #D32F2F; --gris-fondo: #F4F7F6; --texto: #212121; --borde: #dfe6e9; --azul: #1976D2; --verde: #2e7d32; }
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
-        
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 0.8rem; margin: 2px 0; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.55rem; margin: 0 0 3px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
 
-        /* TOOLBAR ULTRA COMPACTA */
         .toolbar { background: white; padding: 5px; border-radius: 6px; margin-bottom: 5px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 75px; }
         label { font-size: 0.4rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
@@ -26,24 +24,19 @@
         .btn { padding: 3px 6px; border-radius: 3px; border: none; color: white; text-transform: uppercase; font-size: 0.48rem; cursor: pointer; font-weight: 700; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
 
-        /* KPI MINIMIZADOS */
         .resumen-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 5px; }
         .card { background: white; padding: 2px 1px; border-radius: 4px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
         .card h3 { color: #888; font-size: 0.4rem; margin: 0; text-transform: uppercase; font-weight: 700; }
         .card p { font-size: 0.7rem; color: var(--rojo); margin: 0; font-weight: 700; line-height: 1.1; }
 
-        /* GRID DASHBOARD */
         .dashboard-grid { display: flex; flex-direction: column; gap: 8px; position: relative; }
         .chart-container, .tabla-critica, .container-imagen { background: white; padding: 5px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: transform 0.2s ease; }
         .chart-box { height: 150px; position: relative; }
-
-        /* EFECTO ZOOM */
-        .chart-container:hover { transform: scale(1.05); z-index: 10; cursor: pointer; }
+        .chart-container:hover { transform: scale(1.03); z-index: 10; cursor: pointer; }
 
         .container-imagen { display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100%; }
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
 
-        /* TABLA */
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 4px; border: 1px solid #eee; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
@@ -60,15 +53,12 @@
                 gap: 8px;
             }
             .tabla-critica { grid-column: 1 / 4; grid-row: 2; height: 100%; }
-            .chart-container:nth-child(1) { grid-column: 1; grid-row: 1; }
-            .container-imagen { grid-column: 2; grid-row: 1; }
-            .chart-container:nth-child(2) { grid-column: 3; grid-row: 1; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Gestión Backlog Regional - Claro Colombia</h1>
+    <h1>Gestión Regional - Top 500 Críticos</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Regional</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -97,14 +87,14 @@
             <div class="chart-box"><canvas id="cEstadoOp"></canvas></div>
         </div>
         <div class="container-imagen">
-            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Info Proyectos">
+            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Info">
         </div>
         <div class="chart-container">
             <h2>DÍAS DE AFECTACIÓN</h2>
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
         </div>
         <div class="tabla-critica">
-            <h2 id="table-title">Detalle Backlog Activo</h2>
+            <h2 id="table-title">Top 500 Sitios Críticos</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
@@ -123,7 +113,6 @@
         async function init() {
             try {
                 const res = await fetch('./data_ben.json');
-                if (!res.ok) throw new Error("JSON no encontrado");
                 dataFull = await res.json();
                 actualizarSelectores(); aplicarCambios(false);
             } catch (e) { console.error(e); }
@@ -164,8 +153,13 @@
 
         function render(data) {
             const estadosFalla = ['AFECTACIÓN TOTAL', 'AFECTACION TOTAL', 'AFECTACIÓN PARCIAL', 'AFECTACION PARCIAL', 'REVISAR', 'SITIO FUERA DE SERVICIO'];
-            const enFalla = data.filter(s => estadosFalla.includes(s.ESTADO_OP.toUpperCase())).sort((a, b) => b.mttr_horas - a.mttr_horas);
             
+            // FILTRAR SITIOS EN FALLA Y ORDENAR POR MTTR (CRITICIDAD)
+            const todosEnFalla = data.filter(s => estadosFalla.includes(s.ESTADO_OP.toUpperCase())).sort((a, b) => b.mttr_horas - a.mttr_horas);
+            
+            // LIMITAR SOLO A LOS 500 MÁS CRÍTICOS PARA LA TABLA
+            const top500 = todosEnFalla.slice(0, 500);
+
             let sumaDisp = 0, sumaHoras = 0, mE = {};
             let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
             
@@ -182,17 +176,19 @@
 
             document.getElementById('t-sitios').innerText = data.length.toLocaleString();
             document.getElementById('d-global').innerText = (sumaDisp / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = enFalla.length.toLocaleString();
-            document.getElementById('m-promedio').innerText = (sumaHoras / (enFalla.length || 1)).toFixed(0) + "h";
-            document.getElementById('d-promedio').innerText = (sumaHoras / (enFalla.length || 1) / 24).toFixed(1) + "d";
+            document.getElementById('t-falla').innerText = todosEnFalla.length.toLocaleString();
+            document.getElementById('m-promedio').innerText = (sumaHoras / (todosEnFalla.length || 1)).toFixed(0) + "h";
+            document.getElementById('d-promedio').innerText = (sumaHoras / (todosEnFalla.length || 1) / 24).toFixed(1) + "d";
 
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
-            enFalla.forEach(s => {
+            top500.forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
+            
+            document.getElementById('table-title').innerText = `Top 500 Sitios Críticos (Mostrando ${top500.length} de ${todosEnFalla.length})`;
             actCharts(mE, rD);
         }
 
@@ -251,11 +247,11 @@
         }
 
         function buscarPorID() {
-            const id = prompt("Ingrese ID del Sitio:");
+            const id = prompt("Ingrese ID:");
             if (id) { registrarEstado(); const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { selectedId = s.ID; aplicarCambios(false); } }
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Top_500_Criticos.xlsx"); }
         init();
     </script>
 </body>
