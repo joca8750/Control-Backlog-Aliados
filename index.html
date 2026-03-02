@@ -14,59 +14,49 @@
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 0.9rem; margin: 5px 0; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.65rem; margin: 0 0 5px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
 
-        /* BARRA DE HERRAMIENTAS */
         .toolbar { background: white; padding: 8px; border-radius: 8px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 85px; }
-        label { font-size: 0.5rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
-        select { padding: 2px 4px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.65rem; background: #fff; height: 24px; cursor: pointer; }
+        label { font-size: 0.5rem; color: #777; text-transform: uppercase; font-weight: 700; }
+        select { padding: 2px 4px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.65rem; height: 24px; }
 
         .btn-container { display: flex; gap: 4px; width: 100%; justify-content: center; margin-top: 4px; }
         .btn { padding: 5px 10px; border-radius: 4px; border: none; color: white; text-transform: uppercase; font-size: 0.55rem; cursor: pointer; font-weight: 700; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
 
-        /* KPI COMPACTOS */
         .resumen-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; }
-        .card { background: white; padding: 4px 2px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .card h3 { color: #888; font-size: 0.45rem; margin: 0; text-transform: uppercase; }
+        .card { background: white; padding: 4px 2px; border-radius: 6px; border-top: 2px solid var(--rojo); text-align: center; }
         .card p { font-size: 0.85rem; color: var(--rojo); margin: 1px 0; font-weight: 700; }
 
-        /* GRID PRINCIPAL */
         .dashboard-grid { display: flex; flex-direction: column; gap: 10px; }
         .chart-container, .tabla-critica, .container-imagen { background: white; padding: 8px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        /* AJUSTE DE ALTURA DE LAS GRÁFICAS */
         .chart-box { height: 160px; position: relative; }
 
         .container-imagen { display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100%; }
-        .container-imagen img { max-width: 100%; max-height: 100%; height: auto; border-radius: 4px; border: 1px solid #eee; }
+        .container-imagen img { max-width: 100%; max-height: 100%; height: auto; border-radius: 4px; }
 
-        /* TABLA ULTRA COMPACTA */
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 6px; border: 1px solid #eee; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
-        th { border-bottom: 2px solid var(--rojo); padding: 6px 3px; text-align: left; font-size: 0.55rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
+        th { border-bottom: 2px solid var(--rojo); padding: 6px 3px; text-align: left; font-size: 0.55rem; position: sticky; top: 0; background: #fdfdfd; z-index: 10; }
         td { padding: 4px 3px; border-bottom: 1px solid #f1f2f6; font-size: 0.58rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
 
         @media (min-width: 1024px) {
-            body { padding: 10px 15px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
             .dashboard-grid {
                 display: grid;
-                grid-template-columns: 1fr 1.1fr 1fr; /* Proporción más equilibrada */
-                grid-template-rows: 200px 1fr; /* Reducción de la fila de gráficas */
+                grid-template-columns: 1fr 1.1fr 1fr;
+                grid-template-rows: 200px 1fr;
                 height: calc(100vh - 170px);
                 gap: 10px;
             }
             .tabla-critica { grid-column: 1 / 4; grid-row: 2; height: 100%; }
-            .chart-container:nth-child(1) { grid-column: 1; grid-row: 1; }
-            .container-imagen { grid-column: 2; grid-row: 1; }
-            .chart-container:nth-child(2) { grid-column: 3; grid-row: 1; }
         }
     </style>
 </head>
 <body>
 
     <h1>Backlog Regional</h1>
-    <div id="tooltip-stopper" style="position: fixed; display: none; background: white; border: 1px solid var(--rojo); padding: 8px; font-size: 0.7rem; z-index: 10000; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+    <div id="tooltip-stopper" style="position: fixed; display: none; background: white; border: 1px solid var(--rojo); padding: 8px; font-size: 0.7rem; z-index: 10000; border-radius: 4px;"></div>
 
     <div class="toolbar">
         <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -75,7 +65,7 @@
         <div class="filter-group"><label>Topol</label><select id="f-topologia" onchange="registrarYFiltrar()"></select></div>
         <div class="filter-group"><label>Op</label><select id="f-tipo-operacion" onchange="registrarYFiltrar()"></select></div>
         <div class="btn-container">
-            <button class="btn btn-search" onclick="buscarPorID()">🔍 Buscar ID</button>
+            <button class="btn btn-search" onclick="buscarPorID()">🔍 ID</button>
             <button class="btn btn-excel" onclick="exportarExcel()">📥 Excel</button>
             <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Return</button>
         </div>
@@ -94,38 +84,131 @@
             <h2>ESTADO CD</h2>
             <div class="chart-box"><canvas id="cEstadoOp"></canvas></div>
         </div>
-
         <div class="container-imagen">
-            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Información Operativa">
+            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Info">
         </div>
-        
         <div class="chart-container">
             <h2>DÍAS DE AFECTACIÓN</h2>
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
         </div>
-        
         <div class="tabla-critica">
             <h2 id="table-title">Backlog Activo</h2>
-            <div class="table-wrapper">
-                <table id="tSitios">
-                    <thead><tr>
-                        <th style="width:65px">ID</th>
-                        <th style="width:100px">ALIADO</th>
-                        <th style="width:50px; text-align:right;">DÍAS</th>
-                        <th style="width:50px; text-align:right;">HORAS</th>
-                        <th style="width:160px">STOPPER / GESTIÓN</th>
-                        <th style="width:90px">OT</th>
-                        <th>DETALLE PERFIL VELOCIDAD</th>
-                    </tr></thead>
-                    <tbody id="b-tabla"></tbody>
-                </table>
-            </div>
+            <div class="table-wrapper"><table id="tSitios"><thead><tr><th>ID</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>DETALLE PERFIL VELOCIDAD</th></tr></thead><tbody id="b-tabla"></tbody></table></div>
         </div>
     </div>
 
     <script>
-        // ... (Script se mantiene idéntico a los pasos funcionales anteriores)
-        // Asegúrate de pegar aquí la lógica de Chart.js y los filtros del código anterior.
+        let dataFull = []; let chartEstado, chartDias; let selectedId = null; let historial = []; 
+        let currentEstadoFilter = null; let currentDayFilter = null;
+        const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
+
+        async function init() {
+            try {
+                const res = await fetch('data_ben.json');
+                if (!res.ok) throw new Error("Error cargando JSON");
+                dataFull = await res.json();
+                actualizarSelectores();
+                aplicarCambios(false);
+            } catch (e) {
+                console.error(e);
+                alert("Error: Asegúrate de correr un servidor local (ej: Live Server en VS Code).");
+            }
+        }
+
+        function registrarEstado() {
+            const estado = { filtros: {}, selectedId, currentEstadoFilter, currentDayFilter };
+            for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
+            historial.push(JSON.stringify(estado));
+            document.getElementById('btn-return').disabled = false;
+        }
+
+        function registrarYFiltrar() { registrarEstado(); currentEstadoFilter = null; currentDayFilter = null; selectedId = null; aplicarCambios(false); }
+
+        function aplicarCambios(conReg = true) {
+            if (conReg) registrarEstado();
+            const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
+            let filtered = dataFull.filter(i => {
+                if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
+                if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
+                if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
+                if (currentEstadoFilter && i.ESTADO_OP !== currentEstadoFilter) return false;
+                if (currentDayFilter) {
+                    const d = i.mttr_horas / 24;
+                    if (currentDayFilter === '>60d' && d <= 60) return false;
+                    if (currentDayFilter === '45-60d' && (d < 45 || d > 60)) return false;
+                    if (currentDayFilter === '30-45d' && (d < 30 || d > 45)) return false;
+                    if (currentDayFilter === '15-30d' && (d < 15 || d > 30)) return false;
+                    if (currentDayFilter === '5-15d' && (d < 5 || d > 15)) return false;
+                    if (currentDayFilter === '<5d' && d > 5) return false;
+                }
+                return i.tickets > 0;
+            });
+            if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
+            actualizarSelectores(); render(filtered);
+        }
+
+        function render(data) {
+            const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
+            let sD = 0, sH = 0, nF = sorted.length, mE = {};
+            let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
+            dataFull.forEach(s => sD += s.disponibilidad);
+            sorted.forEach(s => { 
+                sH += s.mttr_horas; mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
+                const d = s.mttr_horas / 24;
+                if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
+                else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+            });
+            document.getElementById('t-sitios').innerText = dataFull.length;
+            document.getElementById('d-global').innerText = (sD / (dataFull.length || 1)).toFixed(0) + "%";
+            document.getElementById('t-falla').innerText = nF;
+            document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(0) + "h";
+            document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
+            const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
+            sorted.forEach(s => {
+                const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
+                tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right; font-weight:700;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                tb.appendChild(tr);
+            });
+            actCharts(mE, rD);
+        }
+
+        function actCharts(estados, dias) {
+            if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
+            chartEstado = new Chart(document.getElementById('cEstadoOp'), {
+                type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'] }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentEstadoFilter = chartEstado.data.labels[el[0].index]; aplicarCambios(false); } }
+                }
+            });
+            chartDias = new Chart(document.getElementById('cDiasAfectacion'), {
+                type: 'bar', data: { labels: Object.keys(dias), datasets: [{ data: Object.values(dias), backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'] }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentDayFilter = chartDias.data.labels[el[0].index]; aplicarCambios(false); } }
+                }
+            });
+        }
+
+        function pasoAtras() {
+            if (historial.length > 0) {
+                const u = JSON.parse(historial.pop());
+                for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
+                selectedId = u.selectedId; currentEstadoFilter = u.currentEstadoFilter; currentDayFilter = u.currentDayFilter;
+                aplicarCambios(false); if (historial.length === 0) document.getElementById('btn-return').disabled = true;
+            }
+        }
+
+        function actualizarSelectores() {
+            for (let target in filtrosIds) {
+                const unicos = [...new Set(dataFull.map(i => i[filtrosIds[target]]))].filter(v => v).sort();
+                const el = document.getElementById(target); const prev = el.value;
+                el.innerHTML = '<option value="todos">Todos</option>';
+                unicos.forEach(v => el.add(new Option(v, v))); el.value = prev || "todos";
+            }
+        }
+
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte.xlsx"); }
+        init();
     </script>
 </body>
 </html>
