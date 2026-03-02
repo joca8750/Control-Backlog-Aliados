@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Estado Crítico</title>
+    <title>Dashboard Regional - Corrección Colores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -47,7 +47,6 @@
 
         @media (min-width: 1024px) {
             body { padding: 5px 10px; height: 100vh; overflow: hidden; }
-            .resumen-container { grid-template-columns: repeat(5, 1fr); }
             .dashboard-grid {
                 display: grid;
                 grid-template-columns: 1fr 1.1fr 1fr;
@@ -116,7 +115,7 @@
         async function init() {
             try {
                 const res = await fetch('./data_ben.json');
-                if (!res.ok) throw new Error("Error cargando JSON");
+                if (!res.ok) throw new Error("Error");
                 dataFull = await res.json();
                 actualizarSelectores(); aplicarCambios(false);
             } catch (e) { console.error(e); }
@@ -183,17 +182,20 @@
         function actCharts(estados, dias) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             
-            // Colores personalizados para el Gráfico de Estado CD
+            // MAPA DE COLORES MEJORADO (CON Y SIN TILDE PARA AFECTACION TOTAL)
             const colorMap = {
-                'AFECTACIÓN TOTAL': '#D32F2F',      // Rojo Intenso (CAMBIADO)
-                'SITIO FUERA DE SERVICIO': '#B71C1C', // Rojo Oscuro
-                'AFECTACION PARCIAL': '#EF6C00',      // Naranja
-                'REVISAR': '#F9A825',                 // Ámbar/Amarillo
+                'AFECTACIÓN TOTAL': '#D32F2F', 
+                'AFECTACION TOTAL': '#D32F2F', 
+                'SITIO FUERA DE SERVICIO': '#B71C1C', 
+                'AFECTACION PARCIAL': '#EF6C00',      
+                'AFECTACIÓN PARCIAL': '#EF6C00',      
+                'REVISAR': '#F9A825',                 
                 'GESTION TERCEROS': '#1565C0',
+                'GESTIÓN TERCEROS': '#1565C0',
                 'SIN REPORTE': '#9E9E9E'
             };
             const labelsE = Object.keys(estados);
-            const colorsE = labelsE.map(l => colorMap[l] || '#2E7D32');
+            const colorsE = labelsE.map(l => colorMap[l.toUpperCase()] || '#757575');
 
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: labelsE, datasets: [{ data: Object.values(estados), backgroundColor: colorsE }] },
