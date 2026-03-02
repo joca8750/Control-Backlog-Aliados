@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Corrección Colores</title>
+    <title>Dashboard Regional - Servicio Operativo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -115,7 +115,7 @@
         async function init() {
             try {
                 const res = await fetch('./data_ben.json');
-                if (!res.ok) throw new Error("Error");
+                if (!res.ok) throw new Error("Error cargando JSON");
                 dataFull = await res.json();
                 actualizarSelectores(); aplicarCambios(false);
             } catch (e) { console.error(e); }
@@ -182,8 +182,9 @@
         function actCharts(estados, dias) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             
-            // MAPA DE COLORES MEJORADO (CON Y SIN TILDE PARA AFECTACION TOTAL)
+            // MAPA DE COLORES PERSONALIZADO
             const colorMap = {
+                'SERVICIO OPERATIVO': '#2E7D32',      // Verde Intenso (NUEVO)
                 'AFECTACIÓN TOTAL': '#D32F2F', 
                 'AFECTACION TOTAL': '#D32F2F', 
                 'SITIO FUERA DE SERVICIO': '#B71C1C', 
