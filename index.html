@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Vista Compacta</title>
+    <title>Dashboard Regional - Backlog Compacto con Imagen</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -36,12 +36,29 @@
         .chart-container, .tabla-critica { background: white; padding: 8px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .chart-box { height: 180px; position: relative; }
 
+        /* ESTILO PARA LA IMAGEN ADJUNTA */
+        .imagen-seccion-compacta {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center; /* Centrar la imagen si es más pequeña */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .imagen-seccion-compacta img {
+            max-width: 100%; /* No se sale de su contenedor */
+            height: auto;
+            border-radius: 4px;
+        }
+
         /* TABLA ULTRA COMPACTA */
         .table-wrapper { overflow-x: auto; max-height: 450px; border-radius: 6px; border: 1px solid #eee; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 6px 3px; text-align: left; font-size: 0.55rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         
-        /* FUENTE AJUSTADA PARA LA LISTA */
+        /* FUENTE AJUSTADA PARA LA LISTA (0.6rem) */
         td { padding: 4px 3px; border-bottom: 1px solid #f1f2f6; font-size: 0.6rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
@@ -52,7 +69,20 @@
         @media (min-width: 1024px) {
             body { padding: 10px 15px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.8fr; height: calc(100vh - 180px); gap: 12px; align-items: start; }
+            /* AJUSTE DEL GRID PARA INCLUIR LA IMAGEN DEBAJO DE LAS GRÁFICAS */
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: 1fr 1.2fr 1.8fr; /* Mantener 3 columnas */
+                grid-template-rows: auto auto; /* 2 filas: gráficas e imagen, luego tabla larga */
+                height: calc(100vh - 180px);
+                gap: 12px;
+                align-items: start;
+            }
+            .tabla-critica {
+                grid-column: 3; /* La tabla ocupe la columna 3 */
+                grid-row: 1 / 3; /* La tabla ocupe las dos filas de alto */
+                height: 100%; /* Asegurar que use todo el alto disponible */
+            }
         }
     </style>
 </head>
@@ -91,6 +121,10 @@
         <div class="chart-container">
             <h2>DÍAS DE AFECTACIÓN</h2>
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
+        </div>
+
+        <div class="imagen-seccion-compacta">
+            <img src="URL_DE_TU_IMAGEN.png" alt="Información Operativa o Stopper">
         </div>
         
         <div class="tabla-critica">
