@@ -114,11 +114,15 @@
 
         async function init() {
             try {
-                const res = await fetch('./data_ben.json');
+                // Ajuste para GitHub: Evita caché cargando con un parámetro de tiempo
+                const res = await fetch('./data_ben.json?nocache=' + new Date().getTime());
                 if (!res.ok) throw new Error("Error cargando JSON");
                 dataFull = await res.json();
                 actualizarSelectores(); aplicarCambios(false);
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('table-title').innerText = "Error: Verifica que data_ben.json esté en el repositorio.";
+            }
         }
 
         function registrarEstado() {
@@ -134,7 +138,6 @@
             if (conReg) registrarEstado();
             const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
             
-            // FILTRADO DINÁMICO
             let filtered = dataFull.filter(i => {
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
@@ -150,7 +153,7 @@
                     if (currentDayFilter === '5-15d' && (d < 5 || d > 15)) return false;
                     if (currentDayFilter === '<5d' && d > 5) return false;
                 }
-                return true; // Mantener todos para contar el total de sitios del filtro
+                return true;
             });
 
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
@@ -158,7 +161,6 @@
         }
 
         function render(data) {
-            // ORDENAR SOLO LOS QUE TIENEN TICKETS PARA LA TABLA
             const enFalla = data.filter(s => s.tickets > 0).sort((a, b) => b.mttr_horas - a.mttr_horas);
             
             let sD = 0, sH = 0, nF = enFalla.length, mE = {};
@@ -175,8 +177,7 @@
                 }
             });
 
-            // ACTUALIZACIÓN DE CONTADORES SEGÚN EL FILTRO
-            document.getElementById('t-sitios').innerText = data.length; // CANTIDAD ACORDE AL FILTRO
+            document.getElementById('t-sitios').innerText = data.length;
             document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(0) + "%";
             document.getElementById('t-falla').innerText = nF;
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(0) + "h";
