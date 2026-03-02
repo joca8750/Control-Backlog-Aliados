@@ -114,15 +114,12 @@
 
         async function init() {
             try {
-                // Ajuste para GitHub: Evita caché cargando con un parámetro de tiempo
-                const res = await fetch('./data_ben.json?nocache=' + new Date().getTime());
+                // Forzamos n-cache para GitHub Pages
+                const res = await fetch('./data_ben.json?v=' + new Date().getTime());
                 if (!res.ok) throw new Error("Error cargando JSON");
                 dataFull = await res.json();
                 actualizarSelectores(); aplicarCambios(false);
-            } catch (e) { 
-                console.error(e);
-                document.getElementById('table-title').innerText = "Error: Verifica que data_ben.json esté en el repositorio.";
-            }
+            } catch (e) { console.error(e); }
         }
 
         function registrarEstado() {
@@ -161,19 +158,27 @@
         }
 
         function render(data) {
-            const enFalla = data.filter(s => s.tickets > 0).sort((a, b) => b.mttr_horas - a.mttr_horas);
+            // Lógica de Falla: Excluimos explícitamente el SERVICIO OPERATIVO de los cálculos de afectación
+            const enFalla = data.filter(s => s.tickets > 0 && s.ESTADO_OP.toUpperCase() !== 'SERVICIO OPERATIVO')
+                                .sort((a, b) => b.mttr_horas - a.mttr_horas);
             
             let sD = 0, sH = 0, nF = enFalla.length, mE = {};
             let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
             
             data.forEach(s => {
                 sD += s.disponibilidad;
+                
+                // Para la dona de ESTADO CD sí contamos todos (incluyendo Operativo)
                 if (s.tickets > 0) {
-                    sH += s.mttr_horas; 
                     mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
-                    const d = s.mttr_horas / 24;
-                    if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
-                    else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+                    
+                    // Para la gráfica de DÍAS DE AFECTACIÓN excluimos SERVICIO OPERATIVO
+                    if (s.ESTADO_OP.toUpperCase() !== 'SERVICIO OPERATIVO') {
+                        sH += s.mttr_horas; 
+                        const d = s.mttr_horas / 24;
+                        if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
+                        else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+                    }
                 }
             });
 
@@ -184,7 +189,8 @@
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
 
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
-            enFalla.forEach(s => {
+            // Solo mostramos los 500 más críticos en la tabla
+            enFalla.slice(0, 500).forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
