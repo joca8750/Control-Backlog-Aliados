@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Servicio Operativo</title>
+    <title>Dashboard Regional - Backlog Proyectos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -40,7 +40,7 @@
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
 
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 4px; border: 1px solid #eee; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 3px 2px; border-bottom: 1px solid #f1f2f6; font-size: 0.55rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
@@ -99,7 +99,7 @@
             <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
-                    <thead><tr><th>ID</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
+                    <thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
                     <tbody id="b-tabla"></tbody>
                 </table>
             </div>
@@ -137,6 +137,7 @@
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
                 if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
+                if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
                 if (currentEstadoFilter && i.ESTADO_OP !== currentEstadoFilter) return false;
                 if (currentDayFilter) {
                     const d = i.mttr_horas / 24;
@@ -173,7 +174,8 @@
             sorted.forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                // Nueva columna PROYECTO agregada aquí
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
             actCharts(mE, rD);
@@ -181,10 +183,8 @@
 
         function actCharts(estados, dias) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
-            
-            // MAPA DE COLORES PERSONALIZADO
             const colorMap = {
-                'SERVICIO OPERATIVO': '#2E7D32',      // Verde Intenso (NUEVO)
+                'SERVICIO OPERATIVO': '#2E7D32',
                 'AFECTACIÓN TOTAL': '#D32F2F', 
                 'AFECTACION TOTAL': '#D32F2F', 
                 'SITIO FUERA DE SERVICIO': '#B71C1C', 
