@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Top 500 Críticos</title>
+    <title>Dashboard Regional - Diagnóstico Activo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -15,23 +15,20 @@
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 0.8rem; margin: 2px 0; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.55rem; margin: 0 0 3px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
 
-        /* TOOLBAR */
         .toolbar { background: white; padding: 5px; border-radius: 6px; margin-bottom: 5px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 75px; }
-        label { font-size: 0.4rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
-        select { padding: 1px 2px; border-radius: 3px; border: 1px solid var(--borde); font-size: 0.55rem; height: 20px; background: #fff; cursor: pointer; }
+        label { font-size: 0.4rem; color: #777; text-transform: uppercase; font-weight: 700; }
+        select { padding: 1px 2px; border-radius: 3px; border: 1px solid var(--borde); font-size: 0.55rem; height: 20px; background: #fff; }
 
         .btn-container { display: flex; gap: 3px; width: 100%; justify-content: center; margin-top: 2px; }
         .btn { padding: 3px 6px; border-radius: 3px; border: none; color: white; text-transform: uppercase; font-size: 0.48rem; cursor: pointer; font-weight: 700; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
 
-        /* KPIs */
         .resumen-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 5px; }
         .card { background: white; padding: 2px 1px; border-radius: 4px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
         .card h3 { color: #888; font-size: 0.4rem; margin: 0; text-transform: uppercase; font-weight: 700; }
         .card p { font-size: 0.7rem; color: var(--rojo); margin: 0; font-weight: 700; line-height: 1.1; }
 
-        /* GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 8px; position: relative; }
         .chart-container, .tabla-critica, .container-imagen { background: white; padding: 5px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: transform 0.2s ease; }
         .chart-box { height: 150px; position: relative; }
@@ -40,29 +37,22 @@
         .container-imagen { display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100%; }
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
 
-        /* TABLA */
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 4px; border: 1px solid #eee; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 3px 2px; border-bottom: 1px solid #f1f2f6; font-size: 0.55rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
 
         @media (min-width: 1024px) {
             body { padding: 5px 10px; height: 100vh; overflow: hidden; }
-            .dashboard-grid {
-                display: grid;
-                grid-template-columns: 1fr 1.1fr 1fr;
-                grid-template-rows: 180px 1fr;
-                height: calc(100vh - 150px);
-                gap: 8px;
-            }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.1fr 1fr; grid-template-rows: 180px 1fr; height: calc(100vh - 150px); gap: 8px; }
             .tabla-critica { grid-column: 1 / 4; grid-row: 2; height: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Gestión Backlog Regional - Top 500 Críticos</h1>
+    <h1>Gestión Regional - Backlog Claro</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Regional</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -73,7 +63,7 @@
         <div class="btn-container">
             <button class="btn btn-search" onclick="buscarPorID()">🔍 ID</button>
             <button class="btn btn-excel" onclick="exportarExcel()">📥 Excel</button>
-            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Volver</button>
+            <button class="btn btn-return" id="btn-return" onclick="pasoAtras()" disabled>↺ Regresar</button>
         </div>
     </div>
 
@@ -98,13 +88,8 @@
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
         </div>
         <div class="tabla-critica">
-            <h2 id="table-title">Cargando base de datos...</h2>
-            <div class="table-wrapper">
-                <table id="tSitios">
-                    <thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
-                    <tbody id="b-tabla"></tbody>
-                </table>
-            </div>
+            <h2 id="table-title">Cargando datos...</h2>
+            <div class="table-wrapper"><table id="tSitios"><thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead><tbody id="b-tabla"></tbody></table></div>
         </div>
     </div>
 
@@ -116,18 +101,28 @@
 
         async function init() {
             try {
-                const url = './data_ben.json?v=' + new Date().getTime();
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Archivo no encontrado (404)");
-                dataFull = await res.json();
+                // Forzamos que ignore la caché para ver datos reales
+                const res = await fetch('./data_ben.json?nocache=' + new Date().getTime());
+                const text = await res.text(); // Leemos como texto primero para validar
                 
-                document.getElementById('table-title').innerText = "Top 500 Sitios Críticos";
-                actualizarSelectores(); 
-                aplicarCambios(false);
+                try {
+                    dataFull = JSON.parse(text);
+                } catch (e) {
+                    console.error("JSON Mal formado:", text.substring(0, 100));
+                    document.getElementById('table-title').innerText = "ERROR: El archivo JSON tiene un error de formato.";
+                    return;
+                }
+
+                if (dataFull.length > 0) {
+                    document.getElementById('table-title').innerText = "Top 500 Sitios Críticos";
+                    actualizarSelectores(); 
+                    aplicarCambios(false);
+                } else {
+                    document.getElementById('table-title').innerText = "La base de datos está vacía.";
+                }
             } catch (e) {
-                console.error("Error cargando JSON:", e);
-                document.getElementById('table-title').innerText = "ERROR: No se encontró 'data_ben.json' en el servidor.";
-                alert("Atención: El archivo data_ben.json no existe o tiene errores. Verifica que esté subido a GitHub con ese nombre exacto.");
+                console.error("Error de conexión:", e);
+                document.getElementById('table-title').innerText = "Error al conectar con el servidor.";
             }
         }
 
@@ -143,6 +138,7 @@
         function aplicarCambios(conReg = true) {
             if (conReg) registrarEstado();
             const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
+            
             let filtered = dataFull.filter(i => {
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
@@ -166,8 +162,8 @@
 
         function render(data) {
             const estadosFalla = ['AFECTACIÓN TOTAL', 'AFECTACION TOTAL', 'AFECTACIÓN PARCIAL', 'AFECTACION PARCIAL', 'REVISAR', 'SITIO FUERA DE SERVICIO'];
-            const todosEnFalla = data.filter(s => estadosFalla.includes(s.ESTADO_OP.toUpperCase())).sort((a, b) => b.mttr_horas - a.mttr_horas);
-            const top500 = todosEnFalla.slice(0, 500);
+            const enFalla = data.filter(s => estadosFalla.includes(s.ESTADO_OP.toUpperCase())).sort((a, b) => b.mttr_horas - a.mttr_horas);
+            const top500 = enFalla.slice(0, 500);
 
             let sumaDisp = 0, sumaHoras = 0, mE = {};
             let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
@@ -185,9 +181,9 @@
 
             document.getElementById('t-sitios').innerText = data.length.toLocaleString();
             document.getElementById('d-global').innerText = (sumaDisp / (data.length || 1)).toFixed(1) + "%";
-            document.getElementById('t-falla').innerText = todosEnFalla.length.toLocaleString();
-            document.getElementById('m-promedio').innerText = (sumaHoras / (todosEnFalla.length || 1)).toFixed(0) + "h";
-            document.getElementById('d-promedio').innerText = (sumaHoras / (todosEnFalla.length || 1) / 24).toFixed(1) + "d";
+            document.getElementById('t-falla').innerText = enFalla.length.toLocaleString();
+            document.getElementById('m-promedio').innerText = (sumaHoras / (enFalla.length || 1)).toFixed(0) + "h";
+            document.getElementById('d-promedio').innerText = (sumaHoras / (enFalla.length || 1) / 24).toFixed(1) + "d";
 
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
             top500.forEach(s => {
