@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Backlog</title>
+    <title>Dashboard Regional - Backlog Maestro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,10 +12,11 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif !important; }
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 1rem; margin: 5px 0; font-weight: 700; }
-        h2 { color: var(--rojo); font-size: 0.72rem; margin: 0 0 8px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
+        h2 { color: var(--rojo); font-size: 0.72rem; margin: 0 0 5px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
 
-        .toolbar { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 90px; }
+        /* BARRA DE HERRAMIENTAS */
+        .toolbar { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .filter-group { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 90px; }
         label { font-size: 0.55rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
         select { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--borde); font-size: 0.7rem; background: #fff; height: 30px; cursor: pointer; }
 
@@ -24,19 +25,23 @@
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* KPI COMPACTOS */
         .resumen-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
         .card { background: white; padding: 6px 4px; border-radius: 8px; border-top: 3px solid var(--rojo); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .card h3 { color: #888; font-size: 0.55rem; margin: 0; text-transform: uppercase; }
         .card p { font-size: 1rem; color: var(--rojo); margin: 2px 0; font-weight: 700; }
 
+        /* GRID */
         .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
         .chart-container, .tabla-critica { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .chart-box { height: 220px; position: relative; }
+        .chart-box { height: 200px; position: relative; }
 
+        /* TABLA REDISEÑADA */
         .table-wrapper { overflow-x: auto; max-height: 450px; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
         th { border-bottom: 2px solid var(--rojo); padding: 10px 6px; text-align: left; font-size: 0.65rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 8px 6px; border-bottom: 1px solid #f1f2f6; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
         tr:hover td { background-color: #f9f9f9; cursor: pointer; }
 
@@ -45,7 +50,7 @@
         @media (min-width: 1024px) {
             body { padding: 15px 25px; height: 100vh; overflow: hidden; }
             .resumen-container { grid-template-columns: repeat(5, 1fr); }
-            .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; height: calc(100vh - 210px); gap: 15px; }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.8fr; height: calc(100vh - 210px); gap: 15px; align-items: start; }
         }
     </style>
 </head>
@@ -81,6 +86,11 @@
             <div class="chart-box"><canvas id="cEstadoOp"></canvas></div>
         </div>
         
+        <div class="chart-container">
+            <h2>DÍAS DE AFECTACIÓN</h2>
+            <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
+        </div>
+        
         <div class="tabla-critica">
             <h2 id="table-title">Backlog Activo</h2>
             <div class="table-wrapper">
@@ -101,7 +111,8 @@
     </div>
 
     <script>
-        let dataFull = []; let chartEstado; let selectedId = null; let historial = []; let currentEstadoFilter = null;
+        let dataFull = []; let chartEstado, chartDias; let selectedId = null; let historial = []; 
+        let currentEstadoFilter = null; let currentDayFilter = null;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
 
         async function init() {
@@ -110,36 +121,23 @@
 
         function showTooltip(e, item) {
             const tt = document.getElementById('tooltip-stopper');
-            tt.innerHTML = `<b style="color:var(--rojo);">ID: ${item.ID} | ${item.MUNICIPIO}</b><br>Días: ${(item.mttr_horas/24).toFixed(1)} | Horas: ${item.mttr_horas}h<br>ESTADO: <b>${item.ESTADO_OP}</b><br>GESTIÓN: <b>${item.STOPPER}</b>`;
+            tt.innerHTML = `<b style="color:var(--rojo);">ID: ${item.ID}</b><br>Días: ${(item.mttr_horas/24).toFixed(1)} | Horas: ${item.mttr_horas}h<br>ESTADO CD: <b>${item.ESTADO_OP}</b><br>GESTIÓN: <b>${item.STOPPER}</b>`;
             tt.style.display = 'block'; tt.style.left = (e.clientX + 15) + 'px'; tt.style.top = (e.clientY + 15) + 'px';
         }
         function hideTooltip() { document.getElementById('tooltip-stopper').style.display = 'none'; }
 
-        // Función corregida: Guardamos el estado ANTES de cambiar los filtros
         function registrarEstado() {
-            const estado = { 
-                filtros: {}, 
-                selectedId: selectedId, 
-                currentEstadoFilter: currentEstadoFilter 
-            };
-            for (let id in filtrosIds) {
-                estado.filtros[id] = document.getElementById(id).value;
-            }
+            const estado = { filtros: {}, selectedId, currentEstadoFilter, currentDayFilter };
+            for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
             historial.push(JSON.stringify(estado));
             document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() { 
-            registrarEstado(); // Guardamos como estaba antes
-            currentEstadoFilter = null; 
-            selectedId = null; 
-            aplicarCambios(false); 
-        }
+        function registrarYFiltrar() { registrarEstado(); currentEstadoFilter = null; currentDayFilter = null; selectedId = null; aplicarCambios(false); }
 
         function aplicarCambios(conReg = true) {
             if (conReg) registrarEstado();
             const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
-            
             let filtered = dataFull.filter(i => {
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
@@ -147,6 +145,16 @@
                 if (sel.TOPOLOGIA !== 'todos' && i.TOPOLOGIA !== sel.TOPOLOGIA) return false;
                 if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
                 if (currentEstadoFilter && i.ESTADO_OP !== currentEstadoFilter) return false;
+                
+                if (currentDayFilter) {
+                    const d = i.mttr_horas / 24;
+                    if (currentDayFilter === 'Mayor a 60 días' && d <= 60) return false;
+                    if (currentDayFilter === 'de 45 a 60 dias' && (d < 45 || d > 60)) return false;
+                    if (currentDayFilter === 'de 30 a 45 dias' && (d < 30 || d > 45)) return false;
+                    if (currentDayFilter === 'de 15 a 30 dias' && (d < 15 || d > 30)) return false;
+                    if (currentDayFilter === 'de 5 a 15 dias' && (d < 5 || d > 15)) return false;
+                    if (currentDayFilter === 'menor a 5 dias' && d > 5) return false;
+                }
                 return i.tickets > 0;
             });
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
@@ -156,8 +164,20 @@
         function render(data) {
             const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
             let sD = 0, sH = 0, nF = sorted.length, mE = {};
+            let rD = { 'Mayor a 60 días': 0, 'de 45 a 60 dias': 0, 'de 30 a 45 dias': 0, 'de 15 a 30 dias': 0, 'de 5 a 15 dias': 0, 'menor a 5 dias': 0 };
+            
             dataFull.forEach(s => sD += s.disponibilidad);
-            sorted.forEach(s => { sH += s.mttr_horas; mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1; });
+            sorted.forEach(s => { 
+                sH += s.mttr_horas; 
+                mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
+                const d = s.mttr_horas / 24;
+                if (d > 60) rD['Mayor a 60 días']++;
+                else if (d > 45) rD['de 45 a 60 dias']++;
+                else if (d > 30) rD['de 30 a 45 dias']++;
+                else if (d > 15) rD['de 15 a 30 dias']++;
+                else if (d > 5) rD['de 5 a 15 dias']++;
+                else rD['menor a 5 dias']++;
+            });
 
             document.getElementById('t-sitios').innerText = dataFull.length;
             document.getElementById('d-global').innerText = (sD / (dataFull.length || 1)).toFixed(0) + "%";
@@ -170,29 +190,32 @@
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onmouseenter = (e) => showTooltip(e, s); tr.onmouseleave = hideTooltip;
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right; font-weight:700;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
+                tr.innerHTML = `<td>${s.ID}</td><td>${s.ALIADO}</td><td style="text-align:right; font-weight:700; color:var(--rojo);">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right; color:var(--azul);">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
-            document.getElementById('table-title').innerText = currentEstadoFilter ? `ESTADO: ${currentEstadoFilter} (${nF})` : `Backlog Activo (${nF})`;
-            actChart(mE);
+            document.getElementById('table-title').innerText = `Backlog Activo (${nF})`;
+            actCharts(mE, rD);
         }
 
-        function actChart(estados) {
-            if(chartEstado) chartEstado.destroy();
+        function actCharts(estados, dias) {
+            if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             const isMob = window.innerWidth < 1024;
+            
+            // Gráfica de Dona
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'] }] },
-                options: { 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 9 } } }},
-                    onClick: (e, el) => {
-                        if (el.length > 0) {
-                            registrarEstado(); // Guardamos antes de filtrar por la gráfica
-                            const index = el[0].index;
-                            currentEstadoFilter = chartEstado.data.labels[index];
-                            aplicarCambios(false);
-                        }
-                    }
+                options: { maintainAspectRatio: false, plugins: { legend: { position: isMob ? 'bottom' : 'right', labels: { boxWidth: 10, font: { size: 8 } } }},
+                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentEstadoFilter = chartEstado.data.labels[el[0].index]; aplicarCambios(false); } }
+                }
+            });
+
+            // Gráfica de Columnas (Tiempos)
+            const labelsT = ['Mayor a 60 días', 'de 45 a 60 dias', 'de 30 a 45 dias', 'de 15 a 30 dias', 'de 5 a 15 dias', 'menor a 5 dias'];
+            chartDias = new Chart(document.getElementById('cDiasAfectacion'), {
+                type: 'bar', data: { labels: ['>60d', '45-60d', '30-45d', '15-30d', '5-15d', '<5d'], datasets: [{ data: labelsT.map(l => dias[l]), backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'], borderRadius: 3 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { font: { size: 8, weight: 'bold' } }, grid: { display: false } }, y: { beginAtZero: true, ticks: { font: { size: 8 } } } },
+                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentDayFilter = labelsT[el[0].index]; aplicarCambios(false); } }
                 }
             });
         }
@@ -205,21 +228,12 @@
         function pasoAtras() {
             if (historial.length > 0) {
                 const u = JSON.parse(historial.pop());
-                // Restauramos selectores
-                for (let id in u.filtros) {
-                    document.getElementById(id).value = u.filtros[id];
-                }
-                // Restauramos variables de filtro
-                selectedId = u.selectedId;
+                for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
+                selectedId = u.selectedId; 
                 currentEstadoFilter = u.currentEstadoFilter;
-                
-                // Aplicamos los cambios sin registrar este paso en el historial
+                currentDayFilter = u.currentDayFilter;
                 aplicarCambios(false);
-                
-                // Si el historial queda vacío, desactivamos el botón
-                if (historial.length === 0) {
-                    document.getElementById('btn-return').disabled = true;
-                }
+                if (historial.length === 0) document.getElementById('btn-return').disabled = true;
             }
         }
 
