@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Unificado</title>
+    <title>Dashboard Regional - Zoom Interactivo</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -24,18 +24,25 @@
         .btn-container { display: flex; gap: 3px; width: 100%; justify-content: center; margin-top: 2px; }
         .btn { padding: 3px 6px; border-radius: 3px; border: none; color: white; text-transform: uppercase; font-size: 0.48rem; cursor: pointer; font-weight: 700; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
-        .btn:disabled { opacity: 0.3; }
 
-        /* KPI MINIMIZADOS (SITIOS, DISPO, FALLA) */
+        /* KPI MINIMIZADOS */
         .resumen-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 5px; }
         .card { background: white; padding: 2px 1px; border-radius: 4px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
         .card h3 { color: #888; font-size: 0.4rem; margin: 0; text-transform: uppercase; font-weight: 700; }
         .card p { font-size: 0.7rem; color: var(--rojo); margin: 0; font-weight: 700; line-height: 1.1; }
 
         /* GRID DASHBOARD */
-        .dashboard-grid { display: flex; flex-direction: column; gap: 8px; }
-        .chart-container, .tabla-critica, .container-imagen { background: white; padding: 5px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .dashboard-grid { display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .chart-container, .tabla-critica, .container-imagen { background: white; padding: 5px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .chart-box { height: 150px; position: relative; }
+
+        /* EFECTO ZOOM AL PASAR EL CURSOR SOBRE LAS GRÁFICAS */
+        .chart-container:hover {
+            transform: scale(1.2); /* Aumenta el tamaño un 20% */
+            z-index: 100; /* Lo pone por encima de todo */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
 
         .container-imagen { display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100%; }
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
@@ -46,7 +53,6 @@
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 3px 2px; border-bottom: 1px solid #f1f2f6; font-size: 0.55rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
-        tr:hover td { background-color: #f9f9f9; cursor: pointer; }
 
         @media (min-width: 1024px) {
             body { padding: 5px 10px; height: 100vh; overflow: hidden; }
@@ -58,9 +64,6 @@
                 gap: 8px;
             }
             .tabla-critica { grid-column: 1 / 4; grid-row: 2; height: 100%; }
-            .chart-container:nth-child(1) { grid-column: 1; grid-row: 1; }
-            .container-imagen { grid-column: 2; grid-row: 1; }
-            .chart-container:nth-child(2) { grid-column: 3; grid-row: 1; }
         }
     </style>
 </head>
@@ -120,13 +123,12 @@
         async function init() {
             try {
                 const res = await fetch('./data_ben.json');
-                if (!res.ok) throw new Error("Error cargando data_ben.json");
+                if (!res.ok) throw new Error("Error");
                 dataFull = await res.json();
                 actualizarSelectores();
                 aplicarCambios(false);
             } catch (e) {
                 console.error(e);
-                document.getElementById('table-title').innerText = "Error: Verifica que data_ben.json esté en el repositorio.";
             }
         }
 
