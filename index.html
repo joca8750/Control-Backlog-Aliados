@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Backlog Proyectos</title>
+    <title>Dashboard Regional - Filtros Dinámicos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -40,7 +40,7 @@
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
 
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 4px; border: 1px solid #eee; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 3px 2px; border-bottom: 1px solid #f1f2f6; font-size: 0.55rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
@@ -133,6 +133,8 @@
         function aplicarCambios(conReg = true) {
             if (conReg) registrarEstado();
             const sel = {}; for (let id in filtrosIds) sel[filtrosIds[id]] = document.getElementById(id).value;
+            
+            // FILTRADO DINÁMICO
             let filtered = dataFull.filter(i => {
                 if (sel.REGIONAL !== 'todos' && i.REGIONAL !== sel.REGIONAL) return false;
                 if (sel.DEPARTAMENTO !== 'todos' && i.DEPARTAMENTO !== sel.DEPARTAMENTO) return false;
@@ -148,33 +150,42 @@
                     if (currentDayFilter === '5-15d' && (d < 5 || d > 15)) return false;
                     if (currentDayFilter === '<5d' && d > 5) return false;
                 }
-                return i.tickets > 0;
+                return true; // Mantener todos para contar el total de sitios del filtro
             });
+
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
             actualizarSelectores(); render(filtered);
         }
 
         function render(data) {
-            const sorted = data.sort((a, b) => b.mttr_horas - a.mttr_horas);
-            let sD = 0, sH = 0, nF = sorted.length, mE = {};
+            // ORDENAR SOLO LOS QUE TIENEN TICKETS PARA LA TABLA
+            const enFalla = data.filter(s => s.tickets > 0).sort((a, b) => b.mttr_horas - a.mttr_horas);
+            
+            let sD = 0, sH = 0, nF = enFalla.length, mE = {};
             let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
-            dataFull.forEach(s => sD += s.disponibilidad);
-            sorted.forEach(s => { 
-                sH += s.mttr_horas; mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
-                const d = s.mttr_horas / 24;
-                if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
-                else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+            
+            data.forEach(s => {
+                sD += s.disponibilidad;
+                if (s.tickets > 0) {
+                    sH += s.mttr_horas; 
+                    mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
+                    const d = s.mttr_horas / 24;
+                    if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
+                    else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+                }
             });
-            document.getElementById('t-sitios').innerText = dataFull.length;
-            document.getElementById('d-global').innerText = (sD / (dataFull.length || 1)).toFixed(0) + "%";
+
+            // ACTUALIZACIÓN DE CONTADORES SEGÚN EL FILTRO
+            document.getElementById('t-sitios').innerText = data.length; // CANTIDAD ACORDE AL FILTRO
+            document.getElementById('d-global').innerText = (sD / (data.length || 1)).toFixed(0) + "%";
             document.getElementById('t-falla').innerText = nF;
             document.getElementById('m-promedio').innerText = (sH / (nF || 1)).toFixed(0) + "h";
             document.getElementById('d-promedio').innerText = (sH / (nF || 1) / 24).toFixed(1) + "d";
+
             const tb = document.getElementById('b-tabla'); tb.innerHTML = "";
-            sorted.forEach(s => {
+            enFalla.forEach(s => {
                 const tr = document.createElement('tr'); if (s.ID == selectedId) tr.className = 'selected';
                 tr.onclick = () => { registrarEstado(); selectedId = s.ID; aplicarCambios(false); };
-                // Nueva columna PROYECTO agregada aquí
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.mttr_horas/24).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
@@ -184,25 +195,16 @@
         function actCharts(estados, dias) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             const colorMap = {
-                'SERVICIO OPERATIVO': '#2E7D32',
-                'AFECTACIÓN TOTAL': '#D32F2F', 
-                'AFECTACION TOTAL': '#D32F2F', 
-                'SITIO FUERA DE SERVICIO': '#B71C1C', 
-                'AFECTACION PARCIAL': '#EF6C00',      
-                'AFECTACIÓN PARCIAL': '#EF6C00',      
-                'REVISAR': '#F9A825',                 
-                'GESTION TERCEROS': '#1565C0',
-                'GESTIÓN TERCEROS': '#1565C0',
-                'SIN REPORTE': '#9E9E9E'
+                'SERVICIO OPERATIVO': '#2E7D32', 'AFECTACIÓN TOTAL': '#D32F2F', 'AFECTACION TOTAL': '#D32F2F', 
+                'SITIO FUERA DE SERVICIO': '#B71C1C', 'AFECTACION PARCIAL': '#EF6C00', 'AFECTACIÓN PARCIAL': '#EF6C00',      
+                'REVISAR': '#F9A825', 'GESTION TERCEROS': '#1565C0', 'GESTIÓN TERCEROS': '#1565C0', 'SIN REPORTE': '#9E9E9E'
             };
             const labelsE = Object.keys(estados);
             const colorsE = labelsE.map(l => colorMap[l.toUpperCase()] || '#757575');
 
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: labelsE, datasets: [{ data: Object.values(estados), backgroundColor: colorsE }] },
-                options: { 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false }, datalabels: { display: false } },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } },
                     onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentEstadoFilter = chartEstado.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
             });
