@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Zoom Interactivo</title>
+    <title>Dashboard Regional - Alta Visibilidad</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -38,7 +39,7 @@
 
         /* EFECTO ZOOM AL PASAR EL CURSOR SOBRE LAS GRÁFICAS */
         .chart-container:hover {
-            transform: scale(1.2); /* Aumenta el tamaño un 20% */
+            transform: scale(1.15); /* Aumenta el tamaño un 15% */
             z-index: 100; /* Lo pone por encima de todo */
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             cursor: pointer;
@@ -56,6 +57,7 @@
 
         @media (min-width: 1024px) {
             body { padding: 5px 10px; height: 100vh; overflow: hidden; }
+            .resumen-container { grid-template-columns: repeat(5, 1fr); }
             .dashboard-grid {
                 display: grid;
                 grid-template-columns: 1fr 1.1fr 1fr;
@@ -116,6 +118,9 @@
     </div>
 
     <script>
+        // Registramos el plugin globalmente
+        Chart.register(ChartDataLabels);
+
         let dataFull = []; let chartEstado, chartDias; let selectedId = null; let historial = []; 
         let currentEstadoFilter = null; let currentDayFilter = null;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
@@ -123,12 +128,12 @@
         async function init() {
             try {
                 const res = await fetch('./data_ben.json');
-                if (!res.ok) throw new Error("Error");
+                if (!res.ok) throw new Error("Error cargando JSON");
                 dataFull = await res.json();
-                actualizarSelectores();
-                aplicarCambios(false);
+                actualizarSelectores(); aplicarCambios(false);
             } catch (e) {
                 console.error(e);
+                document.getElementById('table-title').innerText = "Error cargando data_ben.json. Asegúrate de usar un servidor local.";
             }
         }
 
@@ -194,14 +199,28 @@
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: ['#D32F2F', '#1565C0', '#2E7D32', '#F9A825', '#6A1B9A', '#EF6C00'] }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } },
                     onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentEstadoFilter = chartEstado.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
             });
+
             chartDias = new Chart(document.getElementById('cDiasAfectacion'), {
                 type: 'bar', data: { labels: Object.keys(dias), datasets: [{ data: Object.values(dias), backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'] }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { font: { size: 6 } } }, y: { beginAtZero: true, ticks: { font: { size: 6 } } } },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+                    // CONFIGURACIÓN DE ALTA VISIBILIDAD PARA DATALABELS
+                    datalabels: {
+                        display: true, // Mostrar los números
+                        anchor: 'end', align: 'top', // Encima de la barra
+                        color: '#D32F2F', // Rojo para que resalte
+                        font: { size: 10, weight: 'bold' }, // Más grande y negrita
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Fondo blanco para legibilidad
+                        borderRadius: 3, padding: 2,
+                        formatter: (value) => value > 0 ? value : '' // No mostrar ceros
+                    }},
+                    scales: { 
+                        x: { ticks: { font: { size: 7.5, weight: 'bold' } } }, // Ejes más grandes
+                        y: { beginAtZero: true, ticks: { font: { size: 8 } } } // Escala más grande
+                    },
                     onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentDayFilter = chartDias.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
             });
