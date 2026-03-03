@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Gestión OT Real</title>
+    <title>Dashboard Regional - Gestión OT y Rangos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -18,7 +18,7 @@
         .toolbar { background: white; padding: 5px; border-radius: 6px; margin-bottom: 5px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 75px; }
         label { font-size: 0.4rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
-        select { padding: 1px 2px; border-radius: 3px; border: 1px solid var(--borde); font-size: 0.55rem; height: 20px; background: #fff; }
+        select { padding: 1px 2px; border-radius: 3px; border: 1px solid var(--borde); font-size: 0.55rem; height: 20px; background: #fff; cursor: pointer; }
 
         .btn-container { display: flex; gap: 3px; width: 100%; justify-content: center; margin-top: 2px; }
         .btn { padding: 3px 6px; border-radius: 3px; border: none; color: white; text-transform: uppercase; font-size: 0.48rem; cursor: pointer; font-weight: 700; }
@@ -51,7 +51,7 @@
     </style>
 </head>
 <body>
-    <h1>Backlog Regional - Gestión Operativa</h1>
+    <h1>Backlog Regional - Gestión Claro Colombia</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -80,14 +80,14 @@
             <div class="chart-box"><canvas id="cEstadoOp"></canvas></div>
         </div>
         <div class="container-imagen">
-            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Referencia Proyectos">
+            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Proyectos">
         </div>
         <div class="chart-container">
-            <h2>DÍAS DE AFECTACIÓN (Solo con OT)</h2>
+            <h2>RANGO VIGENCIA (Sitios con OT)</h2>
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
         </div>
         <div class="tabla-critica">
-            <h2 id="table-title">Detalle Backlog con OT</h2>
+            <h2 id="table-title">Detalle Backlog Activo (Con OT Real)</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
@@ -100,7 +100,7 @@
     <script>
         Chart.register(ChartDataLabels);
         let dataFull = []; let chartEstado, chartDias; let selectedId = null; let historial = []; 
-        let currentEstadoFilter = null; let currentDayFilter = null;
+        let currentEstadoFilter = null; let currentRangeFilter = null;
         const filtrosIds = {'f-regional': 'REGIONAL', 'f-depto': 'DEPARTAMENTO', 'f-aliado': 'ALIADO', 'f-topologia': 'TOPOLOGIA', 'f-tipo-operacion': 'PROYECTO'};
 
         async function init() {
@@ -112,13 +112,13 @@
         }
 
         function registrarEstado() {
-            const estado = { filtros: {}, selectedId, currentEstadoFilter, currentDayFilter };
+            const estado = { filtros: {}, selectedId, currentEstadoFilter, currentRangeFilter };
             for (let id in filtrosIds) estado.filtros[id] = document.getElementById(id).value;
             historial.push(JSON.stringify(estado));
             document.getElementById('btn-return').disabled = false;
         }
 
-        function registrarYFiltrar() { registrarEstado(); currentEstadoFilter = null; currentDayFilter = null; selectedId = null; aplicarCambios(false); }
+        function registrarYFiltrar() { registrarEstado(); currentEstadoFilter = null; currentRangeFilter = null; selectedId = null; aplicarCambios(false); }
 
         function aplicarCambios(conReg = true) {
             if (conReg) registrarEstado();
@@ -129,15 +129,7 @@
                 if (sel.ALIADO !== 'todos' && i.ALIADO !== sel.ALIADO) return false;
                 if (sel.PROYECTO !== 'todos' && i.PROYECTO !== sel.PROYECTO) return false;
                 if (currentEstadoFilter && i.ESTADO_OP !== currentEstadoFilter) return false;
-                if (currentDayFilter) {
-                    const d = i.DIAS_ESTADO || 0;
-                    if (currentDayFilter === '>60d' && d <= 60) return false;
-                    if (currentDayFilter === '45-60d' && (d < 45 || d > 60)) return false;
-                    if (currentDayFilter === '30-45d' && (d < 30 || d > 45)) return false;
-                    if (currentDayFilter === '15-30d' && (d < 15 || d > 30)) return false;
-                    if (currentDayFilter === '5-15d' && (d < 5 || d > 15)) return false;
-                    if (currentDayFilter === '<5d' && d > 5) return false;
-                }
+                if (currentRangeFilter && i.RANGO_VIGENCIA !== currentRangeFilter) return false;
                 return true;
             });
             if (selectedId) filtered = filtered.filter(i => i.ID == selectedId);
@@ -145,7 +137,7 @@
         }
 
         function render(data) {
-            // Lógica Estricta de OT: Debe ser un texto real y no ser "N/A", "0", "SIN OT", etc.
+            // Lógica Estricta de OT Real
             const esOTReal = (val) => {
                 if (!val) return false;
                 const v = String(val).trim().toUpperCase();
@@ -154,26 +146,24 @@
 
             const estadosPermitidos = ['SERVICIO OPERATIVO', 'AFECTACIÓN TOTAL', 'AFECTACION TOTAL', 'AFECTACIÓN PARCIAL', 'AFECTACION PARCIAL', 'REVISAR'];
             
-            // SINCRO: Solo sitios con OT REAL en estados específicos
+            // Solo sitios con OT Válida y estados operativos para la tabla y barras
             const conOTValida = data.filter(s => {
                 return esOTReal(s.OT_REL) && estadosPermitidos.includes(s.ESTADO_OP.toUpperCase());
             }).sort((a, b) => (b.DIAS_ESTADO || 0) - (a.DIAS_ESTADO || 0));
             
-            let sD = 0, sH = 0, sDias = 0, mE = {};
-            let rD = { '>60d': 0, '45-60d': 0, '30-45d': 0, '15-30d': 0, '5-15d': 0, '<5d': 0 };
+            let sD = 0, sH = 0, sDias = 0, mE = {}, rV = {};
             
             data.forEach(s => {
                 sD += s.disponibilidad;
                 mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
             });
 
-            // Conteo exclusivo para la gráfica de barras y KPIs de falla
+            // Agrupación de la gráfica basada exclusivamente en el Rango del Excel
             conOTValida.forEach(s => {
                 sH += s.mttr_horas; 
                 sDias += (s.DIAS_ESTADO || 0);
-                const d = s.DIAS_ESTADO || 0;
-                if (d > 60) rD['>60d']++; else if (d > 45) rD['45-60d']++; else if (d > 30) rD['30-45d']++;
-                else if (d > 15) rD['15-30d']++; else if (d > 5) rD['5-15d']++; else rD['<5d']++;
+                const rango = s.RANGO_VIGENCIA || "Sin Rango";
+                rV[rango] = (rV[rango] || 0) + 1;
             });
 
             document.getElementById('t-sitios').innerText = data.length.toLocaleString();
@@ -189,10 +179,10 @@
                 tr.innerHTML = `<td>${s.ID}</td><td>${s.PROYECTO || "N/A"}</td><td>${s.ALIADO}</td><td style="text-align:right;">${(s.DIAS_ESTADO || 0).toFixed(1)}</td><td style="text-align:right;">${s.mttr_horas}</td><td>${s.STOPPER || "N/A"}</td><td>${s.OT_REL || "N/A"}</td><td>${s.PERFIL || "N/A"}</td>`;
                 tb.appendChild(tr);
             });
-            actCharts(mE, rD);
+            actCharts(mE, rV);
         }
 
-        function actCharts(estados, dias) {
+        function actCharts(estados, rangos) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
             const colorMap = {
                 'SERVICIO OPERATIVO': '#2E7D32', 'AFECTACIÓN TOTAL': '#D32F2F', 'AFECTACION TOTAL': '#D32F2F', 
@@ -206,10 +196,10 @@
                 }
             });
             chartDias = new Chart(document.getElementById('cDiasAfectacion'), {
-                type: 'bar', data: { labels: Object.keys(dias), datasets: [{ data: Object.values(dias), backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#B0BEC5'] }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'end', align: 'top', color: '#D32F2F', font: { weight: 'bold' }, formatter: Math.round } },
+                type: 'bar', data: { labels: Object.keys(rangos), datasets: [{ data: Object.values(rangos), backgroundColor: ['#D32F2F', '#E64A19', '#F9A825', '#1976D2', '#388E3C', '#7B1FA2', '#455A64'] }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'end', align: 'top', color: '#D32F2F', font: { weight: 'bold' } } },
                     scales: { x: { ticks: { font: { size: 7 } } }, y: { beginAtZero: true } },
-                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentDayFilter = chartDias.data.labels[el[0].index]; aplicarCambios(false); } }
+                    onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentRangeFilter = chartDias.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
             });
         }
@@ -218,7 +208,7 @@
             if (historial.length > 0) {
                 const u = JSON.parse(historial.pop());
                 for (let id in u.filtros) document.getElementById(id).value = u.filtros[id];
-                selectedId = u.selectedId; currentEstadoFilter = u.currentEstadoFilter; currentDayFilter = u.currentDayFilter;
+                selectedId = u.selectedId; currentEstadoFilter = u.currentEstadoFilter; currentRangeFilter = u.currentRangeFilter;
                 aplicarCambios(false); if (historial.length === 0) document.getElementById('btn-return').disabled = true;
             }
         }
@@ -233,11 +223,11 @@
         }
 
         function buscarPorID() {
-            const id = prompt("Ingrese ID:");
+            const id = prompt("Ingrese ID id_Beneficiario:");
             if (id) { registrarEstado(); const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { selectedId = s.ID; aplicarCambios(false); } }
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Gestion_Backlog_OT_Real.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog_Claro.xlsx"); }
         init();
     </script>
 </body>
