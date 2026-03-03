@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Regional - Gestión OT y Rangos</title>
+    <title>Dashboard Regional - Orden por Antigüedad</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -14,35 +14,28 @@
         body { background: var(--gris-fondo); margin: 0; padding: 10px; color: var(--texto); overflow-x: hidden; }
         h1 { text-transform: uppercase; color: var(--rojo); text-align: center; font-size: 0.8rem; margin: 2px 0; font-weight: 700; }
         h2 { color: var(--rojo); font-size: 0.55rem; margin: 0 0 3px 0; text-transform: uppercase; text-align: center; font-weight: 700; }
-        
         .toolbar { background: white; padding: 5px; border-radius: 6px; margin-bottom: 5px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 75px; }
         label { font-size: 0.4rem; color: #777; text-transform: uppercase; font-weight: 700; padding-left: 2px; }
         select { padding: 1px 2px; border-radius: 3px; border: 1px solid var(--borde); font-size: 0.55rem; height: 20px; background: #fff; cursor: pointer; }
-
         .btn-container { display: flex; gap: 3px; width: 100%; justify-content: center; margin-top: 2px; }
         .btn { padding: 3px 6px; border-radius: 3px; border: none; color: white; text-transform: uppercase; font-size: 0.48rem; cursor: pointer; font-weight: 700; }
         .btn-excel { background: var(--verde); } .btn-search { background: var(--azul); } .btn-return { background: #34495e; }
-
         .resumen-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 5px; }
         .card { background: white; padding: 2px 1px; border-radius: 4px; border-top: 2px solid var(--rojo); text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
         .card h3 { color: #888; font-size: 0.4rem; margin: 0; text-transform: uppercase; font-weight: 700; }
         .card p { font-size: 0.7rem; color: var(--rojo); margin: 0; font-weight: 700; line-height: 1.1; }
-
         .dashboard-grid { display: flex; flex-direction: column; gap: 8px; position: relative; }
         .chart-container, .tabla-critica, .container-imagen { background: white; padding: 5px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: transform 0.2s ease; }
         .chart-box { height: 150px; position: relative; }
         .chart-container:hover { transform: scale(1.03); z-index: 10; cursor: pointer; }
-
         .container-imagen { display: flex; justify-content: center; align-items: center; overflow: hidden; height: 100%; }
         .container-imagen img { max-width: 100%; max-height: 100%; border-radius: 4px; }
-
         .table-wrapper { overflow-x: auto; max-height: 480px; border-radius: 4px; border: 1px solid #eee; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
         th { border-bottom: 1px solid var(--rojo); padding: 4px 2px; text-align: left; font-size: 0.5rem; color: #666; position: sticky; top: 0; background: #fdfdfd; z-index: 10; text-transform: uppercase; }
         td { padding: 3px 2px; border-bottom: 1px solid #f1f2f6; font-size: 0.55rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected td { background-color: #FFEBEE !important; color: var(--rojo); font-weight: 700; }
-
         @media (min-width: 1024px) {
             body { padding: 5px 10px; height: 100vh; overflow: hidden; }
             .dashboard-grid { display: grid; grid-template-columns: 1fr 1.1fr 1fr; grid-template-rows: 180px 1fr; height: calc(100vh - 150px); gap: 8px; }
@@ -51,7 +44,7 @@
     </style>
 </head>
 <body>
-    <h1>Backlog Regional - Gestión Claro Colombia</h1>
+    <h1>Gestión Backlog Regional - Prioridad por Antigüedad</h1>
 
     <div class="toolbar">
         <div class="filter-group"><label>Reg</label><select id="f-regional" onchange="registrarYFiltrar()"></select></div>
@@ -80,14 +73,14 @@
             <div class="chart-box"><canvas id="cEstadoOp"></canvas></div>
         </div>
         <div class="container-imagen">
-            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Proyectos">
+            <img src="https://raw.githubusercontent.com/joca8750/Control-Backlog-Aliados/main/Captura%20de%20pantalla%202026-02-24%20155002.jpg" alt="Info">
         </div>
         <div class="chart-container">
-            <h2>RANGO VIGENCIA (Sitios con OT)</h2>
+            <h2>RANGO VIGENCIA (Prioridad >60d)</h2>
             <div class="chart-box"><canvas id="cDiasAfectacion"></canvas></div>
         </div>
         <div class="tabla-critica">
-            <h2 id="table-title">Detalle Backlog Activo (Con OT Real)</h2>
+            <h2 id="table-title">Detalle Backlog Activo</h2>
             <div class="table-wrapper">
                 <table id="tSitios">
                     <thead><tr><th>ID</th><th>PROYECTO</th><th>ALIADO</th><th style="text-align:right;">DÍAS</th><th style="text-align:right;">HORAS</th><th>STOPPER</th><th>OT</th><th>PERFIL</th></tr></thead>
@@ -137,7 +130,6 @@
         }
 
         function render(data) {
-            // Lógica Estricta de OT Real
             const esOTReal = (val) => {
                 if (!val) return false;
                 const v = String(val).trim().toUpperCase();
@@ -145,8 +137,6 @@
             };
 
             const estadosPermitidos = ['SERVICIO OPERATIVO', 'AFECTACIÓN TOTAL', 'AFECTACION TOTAL', 'AFECTACIÓN PARCIAL', 'AFECTACION PARCIAL', 'REVISAR'];
-            
-            // Solo sitios con OT Válida y estados operativos para la tabla y barras
             const conOTValida = data.filter(s => {
                 return esOTReal(s.OT_REL) && estadosPermitidos.includes(s.ESTADO_OP.toUpperCase());
             }).sort((a, b) => (b.DIAS_ESTADO || 0) - (a.DIAS_ESTADO || 0));
@@ -158,7 +148,6 @@
                 mE[s.ESTADO_OP] = (mE[s.ESTADO_OP] || 0) + 1;
             });
 
-            // Agrupación de la gráfica basada exclusivamente en el Rango del Excel
             conOTValida.forEach(s => {
                 sH += s.mttr_horas; 
                 sDias += (s.DIAS_ESTADO || 0);
@@ -184,20 +173,51 @@
 
         function actCharts(estados, rangos) {
             if(chartEstado) chartEstado.destroy(); if(chartDias) chartDias.destroy();
+            
+            // LÓGICA DE ORDENAMIENTO POR ANTIGÜEDAD (CRONOLÓGICO INVERSO)
+            // Definimos palabras clave para que siempre ponga los rangos mayores primero
+            const prioridad = (texto) => {
+                const t = texto.toLowerCase();
+                if (t.includes(">") || t.includes("60")) return 1;
+                if (t.includes("45") || (t.includes("60") && t.includes("-"))) return 2;
+                if (t.includes("30") || t.includes("45")) return 3;
+                if (t.includes("15") || t.includes("30")) return 4;
+                if (t.includes("5") || t.includes("15")) return 5;
+                if (t.includes("<") || t.includes("5")) return 6;
+                return 10;
+            };
+
+            const labelsSorted = Object.keys(rangos).sort((a, b) => prioridad(a) - prioridad(b));
+            const dataSorted = labelsSorted.map(l => rangos[l]);
+
             const colorMap = {
                 'SERVICIO OPERATIVO': '#2E7D32', 'AFECTACIÓN TOTAL': '#D32F2F', 'AFECTACION TOTAL': '#D32F2F', 
                 'SITIO FUERA DE SERVICIO': '#B71C1C', 'AFECTACION PARCIAL': '#EF6C00', 'AFECTACIÓN PARCIAL': '#EF6C00',      
                 'REVISAR': '#F9A825', 'GESTION TERCEROS': '#1565C0', 'GESTIÓN TERCEROS': '#1565C0', 'SIN REPORTE': '#9E9E9E'
             };
+
             chartEstado = new Chart(document.getElementById('cEstadoOp'), {
                 type: 'doughnut', data: { labels: Object.keys(estados), datasets: [{ data: Object.values(estados), backgroundColor: Object.keys(estados).map(l => colorMap[l.toUpperCase()] || '#757575') }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
                     onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentEstadoFilter = chartEstado.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
             });
+
             chartDias = new Chart(document.getElementById('cDiasAfectacion'), {
-                type: 'bar', data: { labels: Object.keys(rangos), datasets: [{ data: Object.values(rangos), backgroundColor: ['#D32F2F', '#E64A19', '#F9A825', '#1976D2', '#388E3C', '#7B1FA2', '#455A64'] }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'end', align: 'top', color: '#D32F2F', font: { weight: 'bold' } } },
+                type: 'bar', 
+                data: { 
+                    labels: labelsSorted, 
+                    datasets: [{ 
+                        data: dataSorted, 
+                        backgroundColor: ['#7f0000', '#B71C1C', '#D32F2F', '#E64A19', '#F9A825', '#1976D2', '#388E3C'] 
+                    }] 
+                },
+                options: { 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false }, 
+                        datalabels: { display: true, anchor: 'end', align: 'top', color: '#D32F2F', font: { weight: 'bold' } } 
+                    },
                     scales: { x: { ticks: { font: { size: 7 } } }, y: { beginAtZero: true } },
                     onClick: (e, el) => { if (el.length > 0) { registrarEstado(); currentRangeFilter = chartDias.data.labels[el[0].index]; aplicarCambios(false); } }
                 }
@@ -223,11 +243,11 @@
         }
 
         function buscarPorID() {
-            const id = prompt("Ingrese ID id_Beneficiario:");
+            const id = prompt("Ingrese ID:");
             if (id) { registrarEstado(); const s = dataFull.find(i => String(i.ID) === id.trim()); if (s) { selectedId = s.ID; aplicarCambios(false); } }
         }
 
-        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Reporte_Backlog_Claro.xlsx"); }
+        function exportarExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById('tSitios')), "Backlog_Cronologico.xlsx"); }
         init();
     </script>
 </body>
